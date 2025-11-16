@@ -1,0 +1,53 @@
+@extends('layouts.backendLayout')
+
+@section('content')
+
+<main class="page">
+  <h1 class="h1">Dashboard Overview</h1>
+  <p class="sub">Monitor your IT assets and employee assignments</p>
+
+  <!-- Stat Cards -->
+  <section class="stats4">
+    <article class="statbox">
+      <h4>Active Employees</h4>
+      <div class="row"><div class="num">3</div><div class="chip blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div>
+      <div class="trend"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/></svg>+2 this month</div>
+    </article>
+    <article class="statbox">
+      <h4>Assigned Assets</h4>
+      <div class="row"><div class="num">3</div><div class="chip green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2" ry="2"/><path d="M7 20h10"/></svg></div></div>
+      <div class="trend"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/></svg>2 available</div>
+    </article>
+    <article class="statbox">
+      <h4>Total Licenses</h4>
+      <div class="row"><div class="num">4</div><div class="chip purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4V8z"/></svg></div></div>
+      <div class="trend"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/></svg>108 seats used</div>
+    </article>
+    <article class="statbox">
+      <h4>Expiring Soon</h4>
+      <div class="row"><div class="num">3</div><div class="chip red"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg></div></div>
+      <div class="trend"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/></svg>Next 30 days</div>
+    </article>
+  </section>
+
+  <!-- Lower Panels -->
+  <section class="grid-2">
+    <article class="panel-card panel-pad">
+      <h3>Recent Asset Assignments</h3>
+      <div class="list" role="list">
+        <div class="li" role="listitem"><div><div class="title">MacBook Pro 16&quot;</div><div class="meta">Assigned to Ahmed Al-Rahman</div></div><span class="badge active">Active</span></div>
+        <div class="li" role="listitem"><div><div class="title">Dell XPS 13</div><div class="meta">Assigned to Sarah Johnson</div></div><span class="badge active">Active</span></div>
+        <div class="li" role="listitem"><div><div class="title">iPhone 14 Pro</div><div class="meta">Assigned to Mohammed Ali</div></div><span class="badge active">Active</span></div>
+      </div>
+    </article>
+    <article class="panel-card panel-pad">
+      <h3>License Utilization</h3>
+      <div class="bar"><div class="hdr"><span>Microsoft Office 365</span><span>35/50</span></div><div class="track"><div class="fill" style="width:70%"></div></div></div>
+      <div class="bar"><div class="hdr"><span>Adobe Creative Suite</span><span>8/10</span></div><div class="track"><div class="fill" style="width:80%"></div></div></div>
+      <div class="bar"><div class="hdr"><span>Slack Pro</span><span>45/100</span></div><div class="track"><div class="fill" style="width:45%"></div></div></div>
+      <div class="bar"><div class="hdr"><span>Windows 11 Pro</span><span>20/25</span></div><div class="track"><div class="fill" style="width:80%"></div></div></div>
+    </article>
+  </section>
+</main>
+
+@endsection
