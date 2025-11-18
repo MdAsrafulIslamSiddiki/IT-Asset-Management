@@ -3,13 +3,13 @@
 @section('content')
     <main class="page" x-data="employeeManager()">
         <!-- Success/Error Messages -->
-        @if (session('success'))
+        @if(session('success'))
             <div class="alert success" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                 {{ session('success') }}
             </div>
         @endif
 
-        @if (session('error'))
+        @if(session('error'))
             <div class="alert error" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                 {{ session('error') }}
             </div>
@@ -31,40 +31,38 @@
             <form @submit.prevent="submitForm()">
                 <div class="form-grid" style="margin-top: 10px">
                     <div class="form-row">
-                        <label for="name">Name</label>
+                        <label>Name</label>
                         <input type="text" name="name" class="input" x-model="formData.name" placeholder="" />
                         <span class="error-text" x-show="errors.name" x-text="errors.name"></span>
                     </div>
 
                     <div class="form-row">
-                        <label for="iqama_id">Iqama ID</label>
+                        <label>Iqama ID</label>
                         <input type="number" name="iqama_id" class="input" x-model="formData.iqama_id" placeholder="" />
                         <span class="error-text" x-show="errors.iqama_id" x-text="errors.iqama_id"></span>
                     </div>
 
                     <div class="form-row">
-                        <label for="email">Email</label>
+                        <label>Email</label>
                         <input type="email" name="email" class="input" x-model="formData.email" placeholder="" />
                         <span class="error-text" x-show="errors.email" x-text="errors.email"></span>
                     </div>
 
                     <div class="form-row">
-                        <label for="department">Department</label>
-                        <input type="text" name="department" class="input" x-model="formData.department"
-                            placeholder="" />
+                        <label>Department</label>
+                        <input type="text" name="department" class="input" x-model="formData.department" placeholder="" />
                         <span class="error-text" x-show="errors.department" x-text="errors.department"></span>
                     </div>
 
                     <div class="form-row">
-                        <label for="position">Position</label>
+                        <label>Position</label>
                         <input type="text" name="position" class="input" x-model="formData.position" placeholder="" />
                         <span class="error-text" x-show="errors.position" x-text="errors.position"></span>
                     </div>
 
                     <div class="form-row">
-                        <label for="join_date">Join Date</label>
-                        <input type="date" name="join_date" class="input" x-model="formData.join_date"
-                            placeholder="mm/dd/yyyy" />
+                        <label>Join Date</label>
+                        <input type="text" name="join_date" class="input" x-model="formData.join_date" placeholder="mm/dd/yyyy" />
                         <span class="error-text" x-show="errors.join_date" x-text="errors.join_date"></span>
                     </div>
                 </div>
@@ -101,8 +99,7 @@
                         <div class="pill"><strong>{{ $employee->licenses_count }}</strong><br />Licenses</div>
                     </div>
                     <div class="foot">
-                        <a class="eye" href="javascript:void(0)" @click="viewEmployee({{ $employee->id }})">👁 View
-                            Profile</a>
+                        <a class="eye" href="javascript:void(0)" @click="viewEmployee({{ $employee->id }})">👁 View Profile</a>
                     </div>
                 </article>
             @empty
@@ -129,8 +126,7 @@
                             <div class="kv">Join Date: <span x-text="viewingEmployee.join_date"></span></div>
                             <div class="kv">
                                 Status:
-                                <span class="badge" :class="viewingEmployee.status"
-                                    x-text="viewingEmployee.status"></span>
+                                <span class="badge" :class="viewingEmployee.status" x-text="viewingEmployee.status"></span>
                             </div>
 
                             <h4>Assigned Assets (<span x-text="viewingEmployee.assets?.length || 0"></span>)</h4>
@@ -148,6 +144,13 @@
                         <div>
                             <h3>Quick Actions</h3>
                             <div style="display: grid; gap: 10px">
+                                <button class="btn ghost" @click="editEmployeeFromModal()">
+                                    ✏️ Edit Employee
+                                </button>
+                                <button class="btn" style="background: #ef4444; color: #fff; border-color: #ef4444;"
+                                        @click="deleteEmployeeFromModal()">
+                                    🗑️ Delete Employee
+                                </button>
                                 <button class="btn primary">Generate Clearance Paper</button>
                                 <button class="btn" style="background: #22c55e; color: #fff; border-color: #22c55e;">
                                     Assign Asset
@@ -157,8 +160,7 @@
                                 </button>
                             </div>
 
-                            <h4 style="margin-top: 16px">Assigned Licenses (<span
-                                    x-text="viewingEmployee.licenses?.length || 0"></span>)</h4>
+                            <h4 style="margin-top: 16px">Assigned Licenses (<span x-text="viewingEmployee.licenses?.length || 0"></span>)</h4>
                             <template x-if="viewingEmployee.licenses && viewingEmployee.licenses.length > 0">
                                 <div class="card panel" style="display: grid; gap: 8px">
                                     <template x-for="license in viewingEmployee.licenses" :key="license.id">
@@ -169,6 +171,9 @@
                                         </div>
                                     </template>
                                 </div>
+                            </template>
+                            <template x-if="!viewingEmployee.licenses || viewingEmployee.licenses.length === 0">
+                                <p style="color: #666; font-size: 14px;">No licenses assigned</p>
                             </template>
                         </div>
                     </div>
@@ -247,6 +252,7 @@
                 },
 
                 submitForm() {
+                    // Client-side validation (for UX)
                     if (!this.validateForm()) {
                         return;
                     }
@@ -255,37 +261,47 @@
                     const url = this.editMode ? `/employees/${this.editingId}` : '/employees';
                     const method = this.editMode ? 'PUT' : 'POST';
 
-                    // Get CSRF token from meta tag
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-
                     fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': csrfToken,
-                                'Accept': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                ...this.formData,
-                                _method: method
-                            })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            ...this.formData,
+                            _method: method
                         })
-                        .then(response => response.json())
-                        .then(data => {
+                    })
+                    .then(async response => {
+                        const data = await response.json();
+
+                        // Server-side validation errors (Laravel 422 response)
+                        if (response.status === 422) {
+                            this.errors = {};
+                            // Laravel returns errors in 'errors' or 'message' key
                             if (data.errors) {
-                                this.errors = data.errors;
-                                this.submitting = false;
-                            } else if (data.success) {
-                                window.location.reload();
-                            } else {
-                                throw new Error('Unexpected response');
+                                // Transform Laravel errors format
+                                Object.keys(data.errors).forEach(key => {
+                                    this.errors[key] = data.errors[key][0]; // Get first error message
+                                });
                             }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Something went wrong. Please try again.');
                             this.submitting = false;
-                        });
+                            return;
+                        }
+
+                        // Success
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            throw new Error(data.message || 'Something went wrong');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Something went wrong. Please try again.');
+                        this.submitting = false;
+                    });
                 },
 
                 editEmployee(id) {
@@ -313,7 +329,12 @@
 
                 viewEmployee(id) {
                     fetch(`/employees/${id}`)
-                        .then(response => response.json())
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Failed to fetch');
+                            }
+                            return response.json();
+                        })
                         .then(data => {
                             this.viewingEmployee = data;
                             this.modalOpen = true;
@@ -322,6 +343,40 @@
                             console.error('Error:', error);
                             alert('Failed to load employee details');
                         });
+                },
+
+                editEmployeeFromModal() {
+                    const id = this.viewingEmployee.id;
+                    this.closeModal();
+                    setTimeout(() => {
+                        this.editEmployee(id);
+                    }, 300);
+                },
+
+                deleteEmployeeFromModal() {
+                    if (!confirm(`Are you sure you want to delete ${this.viewingEmployee.name}?`)) {
+                        return;
+                    }
+
+                    fetch(`/employees/${this.viewingEmployee.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Failed to delete employee');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to delete employee');
+                    });
                 },
 
                 closeModal() {

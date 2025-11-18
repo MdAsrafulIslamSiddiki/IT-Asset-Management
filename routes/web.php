@@ -24,5 +24,8 @@ Route::resource('asset-management', AssetController::class);
 Route::post('asset-management/{asset}/assign', [AssetController::class, 'assign'])->name('asset-management.assign');
 Route::post('asset-management/{asset}/unassign', [AssetController::class, 'unassign'])->name('asset-management.unassign');
 
-Route::get('/license', [LicenseController::class, 'index'])->name('license');
+Route::resource('licenses', LicenseController::class);
+Route::post('licenses/{license}/assign', [LicenseController::class, 'assign'])->name('licenses.assign');
+Route::post('licenses/{license}/revoke', [LicenseController::class, 'revoke'])->name('licenses.revoke');
+
 Route::get('/report', [ReportController::class, 'index'])->name('report');

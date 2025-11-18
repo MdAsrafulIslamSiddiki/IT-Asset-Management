@@ -24,7 +24,7 @@
                 Assets
             </a>
 
-            <a class="tab {{ request()->routeIs('license') ? 'active' : '' }}" href="{{ route('license') }}">
+            <a class="tab {{ request()->routeIs('licenses.index') ? 'active' : '' }}" href="{{ route('licenses.index') }}">
                 Licenses
             </a>
 
