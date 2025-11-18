@@ -25,13 +25,22 @@
             <button class="btn primary" @click="openCreateForm()">+ Add Asset</button>
         </div>
 
-        <!-- Statistics Cards -->
+        <!-- Search & Filter Section -->
         <div class="card panel" style="margin-bottom: 16px">
             <div class="search-row">
-                <input class="input" placeholder="Search assets..." /><select class="select" style="width: 200px">
-                    <option>All Status</option>
-                    <option>Assigned</option>
-                    <option>Available</option>
+                <input class="input"
+                       placeholder="Search assets..."
+                       x-model="searchQuery"
+                       @input="filteredAssets" />
+                <select class="select"
+                        style="width: 200px"
+                        x-model="filterStatus"
+                        @change="filteredAssets">
+                    <option value="">All Status</option>
+                    <option value="assigned">Assigned</option>
+                    <option value="available">Available</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="retired">Retired</option>
                 </select>
             </div>
         </div>
@@ -133,7 +142,13 @@
         <h3 style="margin-bottom: 12px;">All Assets</h3>
         <section class="grid-3">
             @forelse($assets as $asset)
-                <article class="card panel">
+                <article class="card panel asset-card"
+                         data-name="{{ $asset->name }}"
+                         data-code="{{ $asset->asset_code }}"
+                         data-type="{{ $asset->type }}"
+                         data-serial="{{ $asset->serial_number }}"
+                         data-brand="{{ $asset->brand }}"
+                         data-status="{{ $asset->status }}">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                         <strong>{{ $asset->name }}</strong>
                         <span class="badge {{ $asset->status }}">{{ $asset->status }}</span>
@@ -336,6 +351,8 @@
                 assignmentNotes: '',
                 returnNotes: '',
                 errors: {},
+                searchQuery: '',
+                filterStatus: '',
                 formData: {
                     name: '',
                     type: '',
@@ -347,6 +364,55 @@
                     value: 0,
                     condition: 'good',
                     notes: ''
+                },
+
+                get filteredAssets() {
+                    const cards = Array.from(document.querySelectorAll('.asset-card'));
+
+                    cards.forEach(card => {
+                        const name = card.dataset.name.toLowerCase();
+                        const code = card.dataset.code.toLowerCase();
+                        const type = card.dataset.type.toLowerCase();
+                        const serial = card.dataset.serial.toLowerCase();
+                        const brand = card.dataset.brand.toLowerCase();
+                        const status = card.dataset.status.toLowerCase();
+
+                        const search = this.searchQuery.toLowerCase();
+                        const statusFilter = this.filterStatus.toLowerCase();
+
+                        const matchesSearch = !search ||
+                            name.includes(search) ||
+                            code.includes(search) ||
+                            type.includes(search) ||
+                            serial.includes(search) ||
+                            brand.includes(search);
+
+                        const matchesStatus = !statusFilter || statusFilter === 'all' || status === statusFilter;
+
+                        if (matchesSearch && matchesStatus) {
+                            card.style.display = '';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+
+                    const visibleCards = cards.filter(card => card.style.display !== 'none');
+                    const noResultsDiv = document.querySelector('.no-results');
+
+                    if (visibleCards.length === 0) {
+                        if (!noResultsDiv) {
+                            const section = document.querySelector('.grid-3');
+                            const div = document.createElement('div');
+                            div.className = 'no-results';
+                            div.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 40px;';
+                            div.innerHTML = '<p>No assets found matching your criteria.</p>';
+                            section.appendChild(div);
+                        }
+                    } else {
+                        if (noResultsDiv) {
+                            noResultsDiv.remove();
+                        }
+                    }
                 },
 
                 openCreateForm() {
@@ -408,54 +474,6 @@
                     return isValid;
                 },
 
-                // submitForm() {
-                //     if (!this.validateForm()) {
-                //         return;
-                //     }
-
-                //     this.submitting = true;
-                //     const url = this.editMode ? `/asset-management/${this.editingId}` : '/asset-management';
-                //     const method = this.editMode ? 'PUT' : 'POST';
-
-                //     fetch(url, {
-                //             method: 'POST',
-                //             headers: {
-                //                 'Content-Type': 'application/json',
-                //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                //                 'Accept': 'application/json',
-                //             },
-                //             body: JSON.stringify({
-                //                 ...this.formData,
-                //                 _method: method
-                //             })
-                //         })
-                //         .then(async response => {
-                //             const data = await response.json();
-
-                //             if (response.status === 422) {
-                //                 this.errors = {};
-                //                 if (data.errors) {
-                //                     Object.keys(data.errors).forEach(key => {
-                //                         this.errors[key] = data.errors[key][0];
-                //                     });
-                //                 }
-                //                 this.submitting = false;
-                //                 return;
-                //             }
-
-                //             if (response.ok) {
-                //                 window.location.reload();
-                //             } else {
-                //                 throw new Error(data.message || 'Something went wrong');
-                //             }
-                //         })
-                //         .catch(error => {
-                //             console.error('Error:', error);
-                //             alert('Something went wrong. Please try again.');
-                //             this.submitting = false;
-                //         });
-                // },
-
                 submitForm() {
                     if (!this.validateForm()) {
                         return;
@@ -463,18 +481,16 @@
 
                     this.submitting = true;
 
-                    // Proper URL construction for resource routes
                     const url = this.editMode ? `/asset-management/${this.editingId}` : '/asset-management';
                     const method = this.editMode ? 'PUT' : 'POST';
 
-                    // Prepare form data with _method for Laravel
                     const formData = {
                         ...this.formData,
                         _method: method
                     };
 
                     fetch(url, {
-                            method: 'POST', // Always POST, Laravel will handle _method
+                            method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -486,7 +502,6 @@
                             const data = await response.json();
 
                             if (response.status === 422) {
-                                // Validation errors
                                 this.errors = {};
                                 if (data.errors) {
                                     Object.keys(data.errors).forEach(key => {
@@ -518,7 +533,6 @@
                             this.editingId = id;
                             this.errors = {};
 
-                            // Convert m/d/Y format to YYYY-MM-DD for date inputs
                             if (data.purchase_date) {
                                 data.purchase_date = this.convertToDateInput(data.purchase_date);
                             }
@@ -554,7 +568,6 @@
                     fetch(`/asset-management/${id}`)
                         .then(response => response.json())
                         .then(data => {
-                            console.log('Asset data received:', data); // Debug
                             this.viewingAsset = data;
                             this.assignEmployeeId = '';
                             this.assignmentNotes = '';
