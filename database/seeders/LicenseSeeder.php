@@ -49,19 +49,7 @@ class LicenseSeeder extends Seeder
                 'cost_per_license' => 8.00,
                 'status' => 'active',
             ],
-            [
-                'license_code' => 'LIC00004',
-                'name' => 'Windows 11 Pro',
-                'vendor' => 'Microsoft',
-                'license_key' => 'XXXXX-XXXXX-XXXXX-XXXXX-44444',
-                'license_type' => 'per-device',
-                'total_quantity' => 25,
-                'used_quantity' => 20,
-                'purchase_date' => '3/1/2023',
-                'expiry_date' => '3/1/2026',
-                'cost_per_license' => 199.99,
-                'status' => 'active',
-            ],
+            
         ];
 
         foreach ($licenses as $license) {

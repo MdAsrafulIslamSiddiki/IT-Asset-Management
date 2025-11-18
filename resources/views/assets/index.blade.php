@@ -1,15 +1,16 @@
 @extends('layouts.backendLayout')
+@section('title', 'Assets')
 
 @section('content')
-    <main class="page" x-data="licenseManager()">
+    <main class="page" x-data="assetManager()">
         <!-- Success/Error Messages -->
-        @if(session('success'))
+        @if (session('success'))
             <div class="alert success" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                 {{ session('success') }}
             </div>
         @endif
 
-        @if(session('error'))
+        @if (session('error'))
             <div class="alert error" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                 {{ session('error') }}
             </div>
@@ -18,51 +19,68 @@
         <!-- Header -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <div>
-                <h1 class="h1">Licenses</h1>
-                <p class="sub">Track subscriptions and seats</p>
+                <h1 class="h1">Asset Management</h1>
+                <p class="sub">Track and manage company assets</p>
             </div>
-            <button class="btn primary" @click="openCreateForm()">+ Add License</button>
+            <button class="btn primary" @click="openCreateForm()">+ Add Asset</button>
         </div>
 
-        <!-- Add/Edit License Form -->
+        <!-- Statistics Cards -->
+        <div class="card panel" style="margin-bottom: 16px">
+            <div class="search-row">
+                <input class="input" placeholder="Search assets..." /><select class="select" style="width: 200px">
+                    <option>All Status</option>
+                    <option>Assigned</option>
+                    <option>Available</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Add/Edit Asset Form -->
         <article class="card panel" x-show="formOpen" x-transition style="display: none; margin-bottom: 16px;">
-            <h3 x-text="editMode ? 'Edit License' : 'Add New License'"></h3>
+            <h3 x-text="editMode ? 'Edit Asset' : 'Add New Asset'"></h3>
 
             <form @submit.prevent="submitForm()">
                 <div class="form-grid" style="margin-top: 10px">
                     <div class="form-row">
-                        <label>Software Name</label>
+                        <label>Asset Name</label>
                         <input type="text" class="input" x-model="formData.name" />
                         <span class="error-text" x-show="errors.name" x-text="errors.name"></span>
                     </div>
 
                     <div class="form-row">
-                        <label>Vendor/Publisher</label>
-                        <input type="text" class="input" x-model="formData.vendor" />
-                        <span class="error-text" x-show="errors.vendor" x-text="errors.vendor"></span>
-                    </div>
-
-                    <div class="form-row">
-                        <label>License Key</label>
-                        <input type="text" class="input" x-model="formData.license_key" />
-                        <span class="error-text" x-show="errors.license_key" x-text="errors.license_key"></span>
-                    </div>
-
-                    <div class="form-row">
-                        <label>License Type</label>
-                        <select class="input" x-model="formData.license_type">
+                        <label>Type</label>
+                        <select class="input" x-model="formData.type">
                             <option value="">Select Type</option>
-                            <option value="per-user">Per User</option>
-                            <option value="per-device">Per Device</option>
-                            <option value="site-license">Site License</option>
+                            <option value="Laptop">Laptop</option>
+                            <option value="Phone">Phone</option>
+                            <option value="Monitor">Monitor</option>
+                            <option value="Tablet">Tablet</option>
+                            <option value="Printer">Printer</option>
+                            <option value="Keyboard">Keyboard</option>
+                            <option value="Mouse">Mouse</option>
+                            <option value="Headset">Headset</option>
+                            <option value="Other">Other</option>
                         </select>
-                        <span class="error-text" x-show="errors.license_type" x-text="errors.license_type"></span>
+                        <span class="error-text" x-show="errors.type" x-text="errors.type"></span>
                     </div>
 
                     <div class="form-row">
-                        <label>Total Quantity</label>
-                        <input type="number" class="input" x-model="formData.total_quantity" min="1" />
-                        <span class="error-text" x-show="errors.total_quantity" x-text="errors.total_quantity"></span>
+                        <label>Serial Number</label>
+                        <input type="text" class="input" x-model="formData.serial_number" />
+                        <span class="error-text" x-show="errors.serial_number" x-text="errors.serial_number"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Brand</label>
+                        <input type="text" class="input" x-model="formData.brand" />
+                        <span class="error-text" x-show="errors.brand" x-text="errors.brand"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Model</label>
+                        <input type="text" class="input" x-model="formData.model" />
+                        <span class="error-text" x-show="errors.model" x-text="errors.model"></span>
                     </div>
 
                     <div class="form-row">
@@ -72,15 +90,26 @@
                     </div>
 
                     <div class="form-row">
-                        <label>Expiry Date</label>
-                        <input type="date" class="input" x-model="formData.expiry_date" />
-                        <span class="error-text" x-show="errors.expiry_date" x-text="errors.expiry_date"></span>
+                        <label>Warranty Expiry</label>
+                        <input type="date" class="input" x-model="formData.warranty_expiry" />
+                        <span class="error-text" x-show="errors.warranty_expiry" x-text="errors.warranty_expiry"></span>
                     </div>
 
                     <div class="form-row">
-                        <label>Cost Per License ($)</label>
-                        <input type="number" class="input" x-model="formData.cost_per_license" step="0.01" min="0" />
-                        <span class="error-text" x-show="errors.cost_per_license" x-text="errors.cost_per_license"></span>
+                        <label>Value ($)</label>
+                        <input type="number" class="input" x-model="formData.value" step="0.01" min="0" />
+                        <span class="error-text" x-show="errors.value" x-text="errors.value"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Condition</label>
+                        <select class="input" x-model="formData.condition">
+                            <option value="excellent">Excellent</option>
+                            <option value="good">Good</option>
+                            <option value="fair">Fair</option>
+                            <option value="poor">Poor</option>
+                        </select>
+                        <span class="error-text" x-show="errors.condition" x-text="errors.condition"></span>
                     </div>
 
                     <div class="form-row" style="grid-column: 1/-1;">
@@ -93,154 +122,195 @@
                 <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px;">
                     <button type="button" class="btn ghost" @click="closeForm()">Cancel</button>
                     <button type="submit" class="btn primary" :disabled="submitting">
-                        <span x-show="!submitting" x-text="editMode ? 'Update License' : 'Add License'"></span>
+                        <span x-show="!submitting" x-text="editMode ? 'Update Asset' : 'Add Asset'"></span>
                         <span x-show="submitting">Processing...</span>
                     </button>
                 </div>
             </form>
         </article>
 
-        <!-- Statistics Cards -->
-        <section class="grid-2" style="margin-bottom: 16px;">
-            <article class="card panel">
-                <h3>Seat Utilization</h3>
-                <div style="display:grid;gap:8px">
-                    @foreach($licenses->take(4) as $license)
-                        <div>
-                            {{ $license->name }} – {{ $license->used_quantity }}/{{ $license->total_quantity }}
-                            <div style="background: #e5e7eb; height: 4px; border-radius: 2px; margin-top: 4px;">
-                                <div style="background: #3b82f6; height: 100%; width: {{ ($license->total_quantity > 0) ? ($license->used_quantity / $license->total_quantity * 100) : 0 }}%; border-radius: 2px;"></div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </article>
-
-            <article class="card panel">
-                <h3>Upcoming Expirations</h3>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>License</th>
-                            <th>Expires</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($licenses->sortBy('expiry_date')->take(5) as $license)
-                            <tr>
-                                <td>{{ $license->name }}</td>
-                                <td>{{ $license->expiry_date }}</td>
-                                <td><span class="badge {{ $license->status }}">{{ $license->status }}</span></td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </article>
-        </section>
-
-        <!-- License Cards -->
-        <h3 style="margin-bottom: 12px;">All Licenses</h3>
+        <!-- Asset Cards -->
+        <h3 style="margin-bottom: 12px;">All Assets</h3>
         <section class="grid-3">
-            @forelse($licenses as $license)
+            @forelse($assets as $asset)
                 <article class="card panel">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                        <strong>{{ $license->name }}</strong>
-                        <span class="badge {{ $license->status }}">{{ $license->status }}</span>
+                        <strong>{{ $asset->name }}</strong>
+                        <span class="badge {{ $asset->status }}">{{ $asset->status }}</span>
                     </div>
-                    <div class="kv">Vendor: {{ $license->vendor }}</div>
-                    <div class="kv">Type: {{ ucwords(str_replace('-', ' ', $license->license_type)) }}</div>
-                    <div class="kv">Seats: {{ $license->used_quantity }}/{{ $license->total_quantity }} used</div>
-                    <div class="kv">Cost: ${{ number_format($license->cost_per_license, 2) }} per license</div>
-                    <div class="kv">Total: ${{ number_format($license->total_cost, 2) }}</div>
-                    <div class="kv">Expires: {{ $license->expiry_date }}</div>
-                    <button class="btn ghost" style="margin-top: 8px;" @click="viewLicense({{ $license->id }})">🗂 Manage</button>
+                    <div class="kv">Code: {{ $asset->asset_code }}</div>
+                    <div class="kv">Type: {{ $asset->type }}</div>
+                    <div class="kv">Serial: {{ $asset->serial_number }}</div>
+                    <div class="kv">Brand: {{ $asset->brand }}</div>
+                    <div class="kv">Value: ${{ number_format($asset->value, 2) }}</div>
+                    <div class="kv">Condition: <span
+                            class="badge {{ $asset->condition }}">{{ $asset->condition }}</span></div>
+                    <div class="kv">
+                        @if ($asset->currentEmployee->first())
+                            Assigned to: <strong>{{ $asset->currentEmployee->first()->name }}</strong>
+                        @else
+                            <span style="color: #666;">Unassigned</span>
+                        @endif
+                    </div>
+                    <button class="btn ghost" style="margin-top: 8px;" @click="viewAsset({{ $asset->id }})">🗂
+                        Manage</button>
                 </article>
             @empty
                 <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
-                    <p>No licenses found. Click "Add License" to create one.</p>
+                    <p>No assets found. Click "Add Asset" to create one.</p>
                 </div>
             @endforelse
         </section>
 
-        <!-- License Detail Modal -->
+        <!-- Asset Detail Modal -->
         <div class="modal" x-show="modalOpen" x-transition style="display: none;">
             <div class="dialog">
                 <div class="head">
-                    <strong x-text="viewingLicense.name"></strong>
+                    <strong x-text="viewingAsset.name"></strong>
                     <button class="btn ghost" @click="closeModal()">✖</button>
                 </div>
                 <div class="body">
                     <div class="cols">
                         <div>
-                            <h3>License Information</h3>
-                            <div class="kv">License Code: <strong x-text="viewingLicense.license_code"></strong></div>
-                            <div class="kv">Vendor: <strong x-text="viewingLicense.vendor"></strong></div>
-                            <div class="kv">License Key: <strong x-text="viewingLicense.license_key"></strong></div>
-                            <div class="kv">Type: <strong x-text="viewingLicense.license_type"></strong></div>
-                            <div class="kv">Total Seats: <strong x-text="viewingLicense.total_quantity"></strong></div>
-                            <div class="kv">Used Seats: <strong x-text="viewingLicense.used_quantity"></strong></div>
-                            <div class="kv">Available: <strong x-text="viewingLicense.available_quantity"></strong></div>
-                            <div class="kv">Purchase Date: <strong x-text="viewingLicense.purchase_date"></strong></div>
-                            <div class="kv">Expiry Date: <strong x-text="viewingLicense.expiry_date"></strong></div>
-                            <div class="kv">Cost per License: <strong>$<span x-text="viewingLicense.cost_per_license"></span></strong></div>
-                            <div class="kv">Total Cost: <strong>$<span x-text="viewingLicense.total_cost"></span></strong></div>
+                            <h3>Asset Information</h3>
+                            <div class="kv">Asset Code: <strong x-text="viewingAsset.asset_code"></strong></div>
+                            <div class="kv">Type: <strong x-text="viewingAsset.type"></strong></div>
+                            <div class="kv">Serial Number: <strong x-text="viewingAsset.serial_number"></strong></div>
+                            <div class="kv">Brand: <strong x-text="viewingAsset.brand"></strong></div>
+                            <div class="kv">Model: <strong x-text="viewingAsset.model"></strong></div>
+                            <div class="kv">Purchase Date: <strong x-text="viewingAsset.purchase_date"></strong></div>
+                            <div class="kv">Warranty Expiry: <strong x-text="viewingAsset.warranty_expiry"></strong>
+                            </div>
+                            <div class="kv">
+                                Warranty Status:
+                                <span class="badge" :class="viewingAsset.is_warranty_expired ? 'expired' : 'active'"
+                                    x-text="viewingAsset.is_warranty_expired ? 'Expired' : 'Active'"></span>
+                            </div>
+                            <div class="kv">Original Value: <strong>$<span
+                                        x-text="viewingAsset.value"></span></strong></div>
+                            <div class="kv">Depreciated Value: <strong>$<span
+                                        x-text="viewingAsset.depreciated_value"></span></strong></div>
+                            <div class="kv">
+                                Condition:
+                                <span class="badge" :class="viewingAsset.condition"
+                                    x-text="viewingAsset.condition"></span>
+                            </div>
                             <div class="kv">
                                 Status:
-                                <span class="badge" :class="viewingLicense.status" x-text="viewingLicense.status"></span>
+                                <span class="badge" :class="viewingAsset.status" x-text="viewingAsset.status"></span>
                             </div>
-                            <div class="kv" x-show="viewingLicense.notes">
-                                Notes: <span x-text="viewingLicense.notes"></span>
+                            <div class="kv" x-show="viewingAsset.notes">
+                                Notes: <span x-text="viewingAsset.notes"></span>
                             </div>
 
-                            <h4 style="margin-top: 16px;">Assigned To (<span x-text="viewingLicense.employees?.length || 0"></span>)</h4>
-                            <template x-if="viewingLicense.employees && viewingLicense.employees.length > 0">
-                                <div style="display: grid; gap: 8px;">
-                                    <template x-for="emp in viewingLicense.employees" :key="emp.id">
-                                        <div class="card panel" style="display: flex; justify-content: space-between; align-items: center;">
-                                            <div>
-                                                <strong x-text="emp.name"></strong>
-                                                <div class="kv" x-text="emp.department"></div>
-                                                <div class="kv">Assigned: <span x-text="emp.assigned_date"></span></div>
+                            <h4 style="margin-top: 16px;">Assignment History</h4>
+                            <template x-if="viewingAsset.assignment_history && viewingAsset.assignment_history.length > 0">
+                                <div style="display: grid; gap: 8px; margin-top: 8px;">
+                                    <template x-for="history in viewingAsset.assignment_history"
+                                        :key="history.employee_id">
+                                        <div class="card panel" style="padding: 8px;">
+                                            <strong x-text="history.employee_name"></strong>
+                                            <div class="kv" style="font-size: 12px;">
+                                                <span x-text="history.department"></span>
                                             </div>
-                                            <button class="btn ghost" @click="revokeLicense(emp.id)">Revoke</button>
+                                            <div class="kv" style="font-size: 12px;">
+                                                Assigned: <span x-text="history.assigned_date"></span>
+                                            </div>
+                                            <div class="kv" style="font-size: 12px;" x-show="history.return_date">
+                                                Returned: <span x-text="history.return_date"></span>
+                                            </div>
+                                            <span class="badge" :class="history.status" x-text="history.status"
+                                                style="font-size: 11px;"></span>
                                         </div>
                                     </template>
                                 </div>
                             </template>
-                            <template x-if="!viewingLicense.employees || viewingLicense.employees.length === 0">
-                                <p style="color: #666; font-size: 14px;">No assignments</p>
+                            <template
+                                x-if="!viewingAsset.assignment_history || viewingAsset.assignment_history.length === 0">
+                                <p style="color: #666; font-size: 14px;">No assignment history</p>
                             </template>
                         </div>
 
                         <div>
-                            <h3>Assign License</h3>
-                            <template x-if="viewingLicense.available_quantity > 0">
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px;">Select Employee:</label>
-                                    <select class="input" x-model="assignEmployeeId" style="width: 100%; margin-bottom: 8px;">
-                                        <option value="">Select Employee</option>
-                                        @foreach($employees as $emp)
-                                            <option value="{{ $emp->id }}">{{ $emp->name }} - {{ $emp->department }}</option>
-                                        @endforeach
-                                    </select>
-                                    <label style="display: block; margin-bottom: 8px;">Expiry Date (Optional):</label>
-                                    <input type="date" class="input" x-model="assignExpiryDate" style="width: 100%; margin-bottom: 8px;" />
-                                    <button class="btn primary" @click="assignLicenseToEmployee()" style="width: 100%;">
-                                        Assign License
+                            <h3>Assignment Management</h3>
+                            <template x-if="viewingAsset.current_employee">
+                                <div class="card panel">
+                                    <strong>Currently Assigned To:</strong>
+                                    <div class="kv" x-text="viewingAsset.current_employee.name"></div>
+                                    <div class="kv" x-text="viewingAsset.current_employee.department"></div>
+                                    <div class="kv" style="font-size: 12px;">
+                                        Assigned: <span x-text="viewingAsset.current_employee.assigned_date"></span>
+                                    </div>
+                                    <div class="kv" style="font-size: 12px;"
+                                        x-show="viewingAsset.current_employee.assignment_notes">
+                                        Notes: <span x-text="viewingAsset.current_employee.assignment_notes"></span>
+                                    </div>
+
+                                    <label
+                                        style="display: block; margin-top: 12px; margin-bottom: 4px; font-size: 12px;">Return
+                                        Notes (Optional):</label>
+                                    <textarea class="textarea" x-model="returnNotes" style="font-size: 12px;" rows="2"></textarea>
+
+                                    <button class="btn ghost" @click="unassignAsset()"
+                                        style="margin-top: 8px; width: 100%;">
+                                        Unassign Asset
                                     </button>
                                 </div>
                             </template>
-                            <template x-if="viewingLicense.available_quantity <= 0">
-                                <p style="color: #ef4444; font-weight: 600;">No available seats</p>
+
+                            <template x-if="!viewingAsset.current_employee && viewingAsset.status !== 'retired'">
+                                <div>
+                                    <p style="color: #666; margin-bottom: 12px; font-size: 14px;">This asset is not
+                                        assigned.</p>
+                                    <label style="display: block; margin-bottom: 8px;">Assign to Employee:</label>
+                                    <select class="input" x-model="assignEmployeeId"
+                                        style="width: 100%; margin-bottom: 8px;">
+                                        <option value="">Select Employee</option>
+                                        @foreach ($employees as $emp)
+                                            <option value="{{ $emp->id }}">{{ $emp->name }} -
+                                                {{ $emp->department }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <label style="display: block; margin-bottom: 4px; font-size: 12px;">Assignment Notes
+                                        (Optional):</label>
+                                    <textarea class="textarea" x-model="assignmentNotes" style="font-size: 12px; margin-bottom: 8px;" rows="2"></textarea>
+
+                                    <button class="btn primary" @click="assignAssetToEmployee()" style="width: 100%;">
+                                        Assign Asset
+                                    </button>
+                                </div>
+                            </template>
+
+                            <h4 style="margin-top: 20px;">Status Management</h4>
+                            <template x-if="viewingAsset.status !== 'assigned'">
+                                <div style="display: grid; gap: 8px; margin-top: 8px;">
+                                    <button class="btn ghost" @click="updateAssetStatus('available')"
+                                        x-show="viewingAsset.status !== 'available'">
+                                        Mark as Available
+                                    </button>
+                                    <button class="btn ghost" @click="updateAssetStatus('maintenance')"
+                                        x-show="viewingAsset.status !== 'maintenance'">
+                                        Mark as Maintenance
+                                    </button>
+                                    <button class="btn ghost" @click="updateAssetStatus('retired')"
+                                        x-show="viewingAsset.status !== 'retired'">
+                                        Mark as Retired
+                                    </button>
+                                </div>
+                            </template>
+                            <template x-if="viewingAsset.status === 'assigned'">
+                                <p style="color: #666; font-size: 12px; margin-top: 8px;">
+                                    Unassign asset first to change status
+                                </p>
                             </template>
 
                             <h4 style="margin-top: 20px;">Quick Actions</h4>
                             <div style="display: grid; gap: 10px;">
-                                <button class="btn ghost" @click="editLicenseFromModal()">✏️ Edit License</button>
+                                <button class="btn ghost" @click="editAssetFromModal()">✏️ Edit Asset</button>
                                 <button class="btn" style="background: #ef4444; color: #fff; border-color: #ef4444;"
-                                        @click="deleteLicenseFromModal()">
-                                    🗑️ Delete License
+                                    @click="deleteAssetFromModal()">
+                                    🗑️ Delete Asset
                                 </button>
                             </div>
                         </div>
@@ -254,26 +324,28 @@
     </main>
 
     <script>
-        function licenseManager() {
+        function assetManager() {
             return {
                 formOpen: false,
                 modalOpen: false,
                 editMode: false,
                 editingId: null,
                 submitting: false,
-                viewingLicense: {},
+                viewingAsset: {},
                 assignEmployeeId: '',
-                assignExpiryDate: '',
+                assignmentNotes: '',
+                returnNotes: '',
                 errors: {},
                 formData: {
                     name: '',
-                    vendor: '',
-                    license_key: '',
-                    license_type: '',
-                    total_quantity: 1,
+                    type: '',
+                    serial_number: '',
+                    brand: '',
+                    model: '',
                     purchase_date: '',
-                    expiry_date: '',
-                    cost_per_license: 0,
+                    warranty_expiry: '',
+                    value: 0,
+                    condition: 'good',
                     notes: ''
                 },
 
@@ -289,27 +361,27 @@
                     let isValid = true;
 
                     if (!this.formData.name || this.formData.name.trim() === '') {
-                        this.errors.name = 'Software name is required';
+                        this.errors.name = 'Asset name is required';
                         isValid = false;
                     }
 
-                    if (!this.formData.vendor || this.formData.vendor.trim() === '') {
-                        this.errors.vendor = 'Vendor is required';
+                    if (!this.formData.type) {
+                        this.errors.type = 'Asset type is required';
                         isValid = false;
                     }
 
-                    if (!this.formData.license_key || this.formData.license_key.trim() === '') {
-                        this.errors.license_key = 'License key is required';
+                    if (!this.formData.serial_number || this.formData.serial_number.trim() === '') {
+                        this.errors.serial_number = 'Serial number is required';
                         isValid = false;
                     }
 
-                    if (!this.formData.license_type) {
-                        this.errors.license_type = 'License type is required';
+                    if (!this.formData.brand || this.formData.brand.trim() === '') {
+                        this.errors.brand = 'Brand is required';
                         isValid = false;
                     }
 
-                    if (!this.formData.total_quantity || this.formData.total_quantity < 1) {
-                        this.errors.total_quantity = 'Total quantity must be at least 1';
+                    if (!this.formData.model || this.formData.model.trim() === '') {
+                        this.errors.model = 'Model is required';
                         isValid = false;
                     }
 
@@ -318,18 +390,71 @@
                         isValid = false;
                     }
 
-                    if (!this.formData.expiry_date || this.formData.expiry_date.trim() === '') {
-                        this.errors.expiry_date = 'Expiry date is required';
+                    if (!this.formData.warranty_expiry || this.formData.warranty_expiry.trim() === '') {
+                        this.errors.warranty_expiry = 'Warranty expiry is required';
                         isValid = false;
                     }
 
-                    if (!this.formData.cost_per_license || this.formData.cost_per_license < 0) {
-                        this.errors.cost_per_license = 'Cost per license is required';
+                    if (!this.formData.value || this.formData.value < 0) {
+                        this.errors.value = 'Valid asset value is required';
+                        isValid = false;
+                    }
+
+                    if (!this.formData.condition) {
+                        this.errors.condition = 'Asset condition is required';
                         isValid = false;
                     }
 
                     return isValid;
                 },
+
+                // submitForm() {
+                //     if (!this.validateForm()) {
+                //         return;
+                //     }
+
+                //     this.submitting = true;
+                //     const url = this.editMode ? `/asset-management/${this.editingId}` : '/asset-management';
+                //     const method = this.editMode ? 'PUT' : 'POST';
+
+                //     fetch(url, {
+                //             method: 'POST',
+                //             headers: {
+                //                 'Content-Type': 'application/json',
+                //                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                //                 'Accept': 'application/json',
+                //             },
+                //             body: JSON.stringify({
+                //                 ...this.formData,
+                //                 _method: method
+                //             })
+                //         })
+                //         .then(async response => {
+                //             const data = await response.json();
+
+                //             if (response.status === 422) {
+                //                 this.errors = {};
+                //                 if (data.errors) {
+                //                     Object.keys(data.errors).forEach(key => {
+                //                         this.errors[key] = data.errors[key][0];
+                //                     });
+                //                 }
+                //                 this.submitting = false;
+                //                 return;
+                //             }
+
+                //             if (response.ok) {
+                //                 window.location.reload();
+                //             } else {
+                //                 throw new Error(data.message || 'Something went wrong');
+                //             }
+                //         })
+                //         .catch(error => {
+                //             console.error('Error:', error);
+                //             alert('Something went wrong. Please try again.');
+                //             this.submitting = false;
+                //         });
+                // },
 
                 submitForm() {
                     if (!this.validateForm()) {
@@ -337,50 +462,56 @@
                     }
 
                     this.submitting = true;
-                    const url = this.editMode ? `/licenses/${this.editingId}` : '/licenses';
+
+                    // Proper URL construction for resource routes
+                    const url = this.editMode ? `/asset-management/${this.editingId}` : '/asset-management';
                     const method = this.editMode ? 'PUT' : 'POST';
 
+                    // Prepare form data with _method for Laravel
+                    const formData = {
+                        ...this.formData,
+                        _method: method
+                    };
+
                     fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            ...this.formData,
-                            _method: method
+                            method: 'POST', // Always POST, Laravel will handle _method
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify(formData)
                         })
-                    })
-                    .then(async response => {
-                        const data = await response.json();
+                        .then(async response => {
+                            const data = await response.json();
 
-                        if (response.status === 422) {
-                            this.errors = {};
-                            if (data.errors) {
-                                Object.keys(data.errors).forEach(key => {
-                                    this.errors[key] = data.errors[key][0];
-                                });
+                            if (response.status === 422) {
+                                // Validation errors
+                                this.errors = {};
+                                if (data.errors) {
+                                    Object.keys(data.errors).forEach(key => {
+                                        this.errors[key] = data.errors[key][0];
+                                    });
+                                }
+                                this.submitting = false;
+                                return;
                             }
-                            this.submitting = false;
-                            return;
-                        }
 
-                        if (response.ok) {
-                            window.location.reload();
-                        } else {
-                            throw new Error(data.message || 'Something went wrong');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Something went wrong. Please try again.');
-                        this.submitting = false;
-                    });
+                            if (response.ok && data.success) {
+                                window.location.reload();
+                            } else {
+                                throw new Error(data.message || 'Something went wrong');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert(error.message || 'Something went wrong. Please try again.');
+                            this.submitting = false;
+                        });
                 },
 
-                editLicense(id) {
-                    fetch(`/licenses/${id}/edit`)
+                editAsset(id) {
+                    fetch(`/asset-management/${id}/edit`)
                         .then(response => response.json())
                         .then(data => {
                             this.editMode = true;
@@ -391,8 +522,8 @@
                             if (data.purchase_date) {
                                 data.purchase_date = this.convertToDateInput(data.purchase_date);
                             }
-                            if (data.expiry_date) {
-                                data.expiry_date = this.convertToDateInput(data.expiry_date);
+                            if (data.warranty_expiry) {
+                                data.warranty_expiry = this.convertToDateInput(data.warranty_expiry);
                             }
 
                             this.formData = data;
@@ -400,13 +531,11 @@
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('Failed to load license data');
+                            alert('Failed to load asset data');
                         });
                 },
 
-                // Helper function to convert date format
                 convertToDateInput(dateStr) {
-                    // Convert m/d/Y to YYYY-MM-DD
                     try {
                         const parts = dateStr.split('/');
                         if (parts.length === 3) {
@@ -421,120 +550,152 @@
                     return dateStr;
                 },
 
-                viewLicense(id) {
-                    fetch(`/licenses/${id}`)
+                viewAsset(id) {
+                    fetch(`/asset-management/${id}`)
                         .then(response => response.json())
                         .then(data => {
-                            this.viewingLicense = data;
+                            console.log('Asset data received:', data); // Debug
+                            this.viewingAsset = data;
                             this.assignEmployeeId = '';
-                            this.assignExpiryDate = '';
+                            this.assignmentNotes = '';
+                            this.returnNotes = '';
                             this.modalOpen = true;
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('Failed to load license details');
+                            alert('Failed to load asset details');
                         });
                 },
 
-                editLicenseFromModal() {
-                    const id = this.viewingLicense.id;
+                editAssetFromModal() {
+                    const id = this.viewingAsset.id;
                     this.closeModal();
                     setTimeout(() => {
-                        this.editLicense(id);
+                        this.editAsset(id);
                     }, 300);
                 },
 
-                deleteLicenseFromModal() {
-                    if (!confirm(`Are you sure you want to delete ${this.viewingLicense.name}?`)) {
+                deleteAssetFromModal() {
+                    if (!confirm(`Are you sure you want to delete ${this.viewingAsset.name}?`)) {
                         return;
                     }
 
-                    fetch(`/licenses/${this.viewingLicense.id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            window.location.reload();
-                        } else {
-                            alert(data.message || 'Failed to delete license');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Failed to delete license');
-                    });
+                    fetch(`/asset-management/${this.viewingAsset.id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.reload();
+                            } else {
+                                alert(data.message || 'Failed to delete asset');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to delete asset');
+                        });
                 },
 
-                assignLicenseToEmployee() {
+                assignAssetToEmployee() {
                     if (!this.assignEmployeeId) {
                         alert('Please select an employee');
                         return;
                     }
 
-                    fetch(`/licenses/${this.viewingLicense.id}/assign`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: JSON.stringify({
-                            employee_id: this.assignEmployeeId,
-                            expiry_date: this.assignExpiryDate
+                    fetch(`/asset-management/${this.viewingAsset.id}/assign`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({
+                                employee_id: this.assignEmployeeId,
+                                assignment_notes: this.assignmentNotes
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            window.location.reload();
-                        } else {
-                            alert(data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Failed to assign license');
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert(data.message);
+                                window.location.reload();
+                            } else {
+                                alert(data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to assign asset');
+                        });
                 },
 
-                revokeLicense(employeeId) {
-                    if (!confirm('Are you sure you want to revoke this license?')) {
+                unassignAsset() {
+                    if (!confirm('Are you sure you want to unassign this asset?')) {
                         return;
                     }
 
-                    fetch(`/licenses/${this.viewingLicense.id}/revoke`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: JSON.stringify({
-                            employee_id: employeeId
+                    fetch(`/asset-management/${this.viewingAsset.id}/unassign`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({
+                                return_notes: this.returnNotes
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            window.location.reload();
-                        } else {
-                            alert(data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Failed to revoke license');
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert(data.message);
+                                window.location.reload();
+                            } else {
+                                alert(data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to unassign asset');
+                        });
+                },
+
+                updateAssetStatus(status) {
+                    if (!confirm(`Are you sure you want to mark this asset as ${status}?`)) {
+                        return;
+                    }
+
+                    fetch(`/asset-management/${this.viewingAsset.id}/status`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({
+                                status: status
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert(data.message);
+                                window.location.reload();
+                            } else {
+                                alert(data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to update status');
+                        });
                 },
 
                 closeModal() {
                     this.modalOpen = false;
-                    this.viewingLicense = {};
+                    this.viewingAsset = {};
                 },
 
                 closeForm() {
@@ -547,13 +708,14 @@
                     this.submitting = false;
                     this.formData = {
                         name: '',
-                        vendor: '',
-                        license_key: '',
-                        license_type: '',
-                        total_quantity: 1,
+                        type: '',
+                        serial_number: '',
+                        brand: '',
+                        model: '',
                         purchase_date: '',
-                        expiry_date: '',
-                        cost_per_license: 0,
+                        warranty_expiry: '',
+                        value: 0,
+                        condition: 'good',
                         notes: ''
                     };
                 }

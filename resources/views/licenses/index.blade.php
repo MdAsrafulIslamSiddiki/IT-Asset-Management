@@ -1,4 +1,5 @@
 @extends('layouts.backendLayout')
+@section('title', 'Licenses')
 
 @section('content')
     <main class="page" x-data="licenseManager()">
@@ -67,13 +68,13 @@
 
                     <div class="form-row">
                         <label>Purchase Date</label>
-                        <input type="date" class="input" x-model="formData.purchase_date" placeholder="mm/dd/yyyy" />
+                        <input type="date" class="input" x-model="formData.purchase_date" />
                         <span class="error-text" x-show="errors.purchase_date" x-text="errors.purchase_date"></span>
                     </div>
 
                     <div class="form-row">
                         <label>Expiry Date</label>
-                        <input type="date" class="input" x-model="formData.expiry_date" placeholder="mm/dd/yyyy" />
+                        <input type="date" class="input" x-model="formData.expiry_date" />
                         <span class="error-text" x-show="errors.expiry_date" x-text="errors.expiry_date"></span>
                     </div>
 
@@ -225,7 +226,7 @@
                                         @endforeach
                                     </select>
                                     <label style="display: block; margin-bottom: 8px;">Expiry Date (Optional):</label>
-                                    <input type="text" class="input" x-model="assignExpiryDate" placeholder="mm/dd/yyyy" style="width: 100%; margin-bottom: 8px;" />
+                                    <input type="date" class="input" x-model="assignExpiryDate" style="width: 100%; margin-bottom: 8px;" />
                                     <button class="btn primary" @click="assignLicenseToEmployee()" style="width: 100%;">
                                         Assign License
                                     </button>
@@ -313,12 +314,12 @@
                         isValid = false;
                     }
 
-                    if (!this.formData.purchase_date || this.formData.purchase_date === '') {
+                    if (!this.formData.purchase_date || this.formData.purchase_date.trim() === '') {
                         this.errors.purchase_date = 'Purchase date is required';
                         isValid = false;
                     }
 
-                    if (!this.formData.expiry_date || this.formData.expiry_date === '') {
+                    if (!this.formData.expiry_date || this.formData.expiry_date.trim() === '') {
                         this.errors.expiry_date = 'Expiry date is required';
                         isValid = false;
                     }
@@ -386,13 +387,40 @@
                             this.editMode = true;
                             this.editingId = id;
                             this.errors = {};
+
+                            // Convert m/d/Y format to YYYY-MM-DD for date inputs
+                            if (data.purchase_date) {
+                                data.purchase_date = this.convertToDateInput(data.purchase_date);
+                            }
+                            if (data.expiry_date) {
+                                data.expiry_date = this.convertToDateInput(data.expiry_date);
+                            }
+
                             this.formData = data;
                             this.formOpen = true;
+
                         })
                         .catch(error => {
                             console.error('Error:', error);
                             alert('Failed to load license data');
                         });
+                },
+
+                // Helper function to convert date format
+                convertToDateInput(dateStr) {
+                    // Convert m/d/Y to YYYY-MM-DD
+                    try {
+                        const parts = dateStr.split('/');
+                        if (parts.length === 3) {
+                            const month = parts[0].padStart(2, '0');
+                            const day = parts[1].padStart(2, '0');
+                            const year = parts[2];
+                            return `${year}-${month}-${day}`;
+                        }
+                    } catch (e) {
+                        console.error('Date conversion error:', e);
+                    }
+                    return dateStr;
                 },
 
                 viewLicense(id) {

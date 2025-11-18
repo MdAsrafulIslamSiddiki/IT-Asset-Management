@@ -24,8 +24,7 @@ class AssetSeeder extends Seeder
                 'warranty_expiry' => '1/10/2026',
                 'value' => 2500.00,
                 'condition' => 'excellent',
-                'status' => 'assigned',
-                'employee_id' => $employees->first()->id ?? null,
+                'status' => 'available',
             ],
             [
                 'asset_code' => 'AST00002',
@@ -38,8 +37,7 @@ class AssetSeeder extends Seeder
                 'warranty_expiry' => '2/15/2026',
                 'value' => 1800.00,
                 'condition' => 'good',
-                'status' => 'assigned',
-                'employee_id' => $employees->skip(1)->first()->id ?? null,
+                'status' => 'available',
             ],
             [
                 'asset_code' => 'AST00003',
@@ -52,8 +50,7 @@ class AssetSeeder extends Seeder
                 'warranty_expiry' => '3/1/2025',
                 'value' => 1200.00,
                 'condition' => 'excellent',
-                'status' => 'assigned',
-                'employee_id' => $employees->skip(2)->first()->id ?? null,
+                'status' => 'available',
             ],
         ];
 

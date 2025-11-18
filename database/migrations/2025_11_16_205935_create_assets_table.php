@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +11,7 @@ return new class extends Migration
             $table->id();
             $table->string('asset_code')->unique();
             $table->string('name');
-            $table->string('type');
+            $table->enum('type', ['Laptop', 'Phone', 'Monitor', 'Tablet', 'Printer', 'Keyboard', 'Mouse', 'Headset', 'Other'])->default('Other');
             $table->string('serial_number')->unique();
             $table->string('brand');
             $table->string('model');
@@ -20,11 +19,9 @@ return new class extends Migration
             $table->string('warranty_expiry');
             $table->decimal('value', 10, 2)->default(0);
             $table->enum('condition', ['excellent', 'good', 'fair', 'poor'])->default('good');
-            $table->text('notes')->nullable();
             $table->enum('status', ['available', 'assigned', 'maintenance', 'retired'])->default('available');
-            $table->foreignId('employee_id')->nullable()->constrained()->onDelete('set null');
+            $table->text('notes')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
