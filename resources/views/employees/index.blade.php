@@ -1,22 +1,16 @@
 @extends('layouts.backendLayout')
 @section('title', 'Employees')
 
-
-
 @section('content')
     <main class="page" x-data="employeeManager()">
-        <!-- Success/Error Messages -->
-        @if(session('success'))
-            <div class="alert success" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert error" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                {{ session('error') }}
-            </div>
-        @endif
+        <!-- Dynamic Flash Messages (Alpine.js controlled) -->
+        <div x-show="flashMessage"
+             x-transition
+             class="alert"
+             :class="flashType"
+             x-text="flashMessage"
+             style="display: none; margin-bottom: 16px; padding: 12px 16px; border-radius: 8px; font-weight: 500;">
+        </div>
 
         <!-- Header -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -285,6 +279,11 @@
                 errors: {},
                 assignAssetErrors: {},
                 assignLicenseErrors: {},
+
+                // Flash message properties
+                flashMessage: '',
+                flashType: '',
+
                 formData: {
                     name: '',
                     iqama_id: '',
@@ -300,6 +299,40 @@
                 assignLicenseData: {
                     license_id: '',
                     expiry_date: ''
+                },
+
+                // Initialize component - check for flash messages from localStorage
+                init() {
+                    this.checkFlashMessage();
+                },
+
+                // Show flash message
+                showFlash(message, type = 'success') {
+                    this.flashMessage = message;
+                    this.flashType = type;
+
+                    // Auto hide after 4 seconds
+                    setTimeout(() => {
+                        this.flashMessage = '';
+                    }, 4000);
+                },
+
+                // Check localStorage for flash message after page reload
+                checkFlashMessage() {
+                    const flash = localStorage.getItem('flashMessage');
+                    if (flash) {
+                        const data = JSON.parse(flash);
+                        this.showFlash(data.message, data.type);
+                        localStorage.removeItem('flashMessage');
+                    }
+                },
+
+                // Set flash message in localStorage (before page reload)
+                setFlashMessage(message, type = 'success') {
+                    localStorage.setItem('flashMessage', JSON.stringify({
+                        message: message,
+                        type: type
+                    }));
                 },
 
                 openCreateForm() {
@@ -358,7 +391,6 @@
                     const url = this.editMode ? `/employees/${this.editingId}` : '/employees';
                     const method = this.editMode ? 'PUT' : 'POST';
 
-                    // Convert date to storage format
                     const formData = {
                         ...this.formData,
                         join_date: this.convertToStorageFormat(this.formData.join_date),
@@ -389,6 +421,9 @@
                         }
 
                         if (response.ok && data.success) {
+                            // Set flash message in localStorage
+                            this.setFlashMessage(data.message, 'success');
+                            // Reload page to show updated list
                             window.location.reload();
                         } else {
                             throw new Error(data.message || 'Something went wrong');
@@ -396,18 +431,16 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert(error.message || 'Something went wrong. Please try again.');
+                        this.showFlash(error.message || 'Something went wrong', 'error');
                         this.submitting = false;
                     });
                 },
 
                 convertToStorageFormat(date) {
                     try {
-                        // If already in m/d/Y format, return as is
                         if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(date)) {
                             return date;
                         }
-                        // Convert from YYYY-MM-DD to m/d/Y
                         const d = new Date(date);
                         return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
                     } catch (e) {
@@ -450,7 +483,7 @@
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('Failed to load employee data');
+                            this.showFlash('Failed to load employee data', 'error');
                         });
                 },
 
@@ -466,7 +499,7 @@
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('Failed to load employee details');
+                            this.showFlash('Failed to load employee details', 'error');
                         });
                 },
 
@@ -491,25 +524,24 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
+                            this.setFlashMessage(data.message, 'success');
                             window.location.reload();
                         } else {
-                            alert(data.message || 'Failed to delete employee');
+                            this.showFlash(data.message || 'Failed to delete employee', 'error');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Failed to delete employee');
+                        this.showFlash('Failed to delete employee', 'error');
                     });
                 },
 
                 generateClearancePaper() {
-                    // Simply redirect to backend route for download
                     const url = `/employees/${this.viewingEmployee.id}/clearance`;
                     window.location.href = url;
 
-                    // Show notification
                     setTimeout(() => {
-                        alert('Clearance paper download started!');
+                        this.showFlash('Clearance paper download started!', 'success');
                     }, 500);
                 },
 
@@ -546,15 +578,15 @@
                     .then(data => {
                         this.assigningAsset = false;
                         if (data.success) {
-                            alert(data.message);
+                            this.setFlashMessage(data.message, 'success');
                             window.location.reload();
                         } else {
-                            alert(data.message || 'Failed to assign asset');
+                            this.showFlash(data.message || 'Failed to assign asset', 'error');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Failed to assign asset');
+                        this.showFlash('Failed to assign asset', 'error');
                         this.assigningAsset = false;
                     });
                 },
@@ -605,15 +637,15 @@
                     .then(data => {
                         this.assigningLicense = false;
                         if (data.success) {
-                            alert(data.message);
+                            this.setFlashMessage(data.message, 'success');
                             window.location.reload();
                         } else {
-                            alert(data.message || 'Failed to assign license');
+                            this.showFlash(data.message || 'Failed to assign license', 'error');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Failed to assign license');
+                        this.showFlash('Failed to assign license', 'error');
                         this.assigningLicense = false;
                     });
                 },
@@ -643,4 +675,5 @@
             }
         }
     </script>
+
 @endsection

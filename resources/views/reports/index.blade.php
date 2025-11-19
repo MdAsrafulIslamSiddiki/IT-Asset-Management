@@ -1,4 +1,5 @@
 @extends('layouts.backendLayout')
+@section('title', 'Reports')
 
 @section('content')
     <main class="page">

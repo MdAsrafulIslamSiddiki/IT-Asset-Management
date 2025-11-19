@@ -46,7 +46,6 @@ class EmployeeController extends Controller
         try {
             $employee = $this->employeeService->createEmployee($request->validated());
 
-
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -58,7 +57,6 @@ class EmployeeController extends Controller
             return redirect()->route('employees.index')
                 ->with('success', 'Employee created successfully');
         } catch (\Exception $e) {
-
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -101,7 +99,6 @@ class EmployeeController extends Controller
                 ])
             ]);
         } catch (\Exception $e) {
-
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to load employee details'
@@ -139,7 +136,6 @@ class EmployeeController extends Controller
         try {
             $updatedEmployee = $this->employeeService->updateEmployee($employee, $request->validated());
 
-
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -151,7 +147,6 @@ class EmployeeController extends Controller
             return redirect()->route('employees.index')
                 ->with('success', 'Employee updated successfully');
         } catch (\Exception $e) {
-
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -182,7 +177,6 @@ class EmployeeController extends Controller
             return redirect()->route('employees.index')
                 ->with('success', 'Employee deleted successfully');
         } catch (\Exception $e) {
-
             if (request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -207,7 +201,7 @@ class EmployeeController extends Controller
         try {
             $asset = Asset::findOrFail($request->asset_id);
 
-            // Check if asset is already assigned (using pivot table)
+            // Check if asset is already assigned to this employee
             $existingAssignment = $employee->assets()
                 ->where('asset_id', $asset->id)
                 ->wherePivot('assignment_status', 'active')
@@ -220,7 +214,7 @@ class EmployeeController extends Controller
                 ], 400);
             }
 
-            // Check if asset is assigned to ANY employee (using pivot table)
+            // Check if asset is assigned to ANY employee
             $isAssetAssigned = DB::table('employee_asset')
                 ->where('asset_id', $asset->id)
                 ->where('assignment_status', 'active')
@@ -233,29 +227,22 @@ class EmployeeController extends Controller
                 ], 400);
             }
 
-            // Remove this direct assignment (NO LONGER NEEDED)
-            // $asset->employee_id = $employee->id;
-            // $asset->status = 'assigned';
-            // $asset->save();
-
-            // Update asset status only
+            // Update asset status
             $asset->status = 'assigned';
             $asset->save();
 
-            // Create assignment record in pivot table (ONLY THIS)
+            // Create assignment record in pivot table
             $employee->assets()->attach($asset->id, [
-                'assigned_date' => date('Y-m-d'), // Use Y-m-d format for database
+                'assigned_date' => date('Y-m-d'),
                 'assignment_notes' => $request->notes,
                 'assignment_status' => 'active'
             ]);
-
 
             return response()->json([
                 'success' => true,
                 'message' => 'Asset assigned successfully'
             ]);
         } catch (\Exception $e) {
-
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to assign asset: ' . $e->getMessage()
@@ -302,7 +289,7 @@ class EmployeeController extends Controller
                 'status' => 'active'
             ]);
 
-            // Update used_quantity - INCREMENT by 1
+            // Update used_quantity
             $license->increment('used_quantity');
 
             return response()->json([
@@ -310,7 +297,6 @@ class EmployeeController extends Controller
                 'message' => 'License assigned successfully'
             ]);
         } catch (\Exception $e) {
-
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to assign license: ' . $e->getMessage()
@@ -320,28 +306,20 @@ class EmployeeController extends Controller
 
     /**
      * Generate and download employee clearance paper
-     *
-     * @param Employee $employee
-     * @return \Illuminate\Http\Response
      */
     public function generateClearance(Employee $employee)
     {
         try {
-            // Load relationships
             $employee->load(['assets', 'licenses']);
 
-            // Render the blade view as plain text
             $content = View::make('clearance.template', compact('employee'))->render();
 
-            // Generate filename
             $filename = 'Clearance_'
                       . str_replace(' ', '_', $employee->name)
                       . '_' . $employee->iqama_id
                       . '_' . date('Ymd_His')
                       . '.txt';
 
-
-            // Return as downloadable text file
             return response($content)
                 ->header('Content-Type', 'text/plain')
                 ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
