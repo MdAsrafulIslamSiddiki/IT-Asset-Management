@@ -28,14 +28,8 @@
         <!-- Search & Filter Section -->
         <div class="card panel" style="margin-bottom: 16px">
             <div class="search-row">
-                <input class="input"
-                       placeholder="Search assets..."
-                       x-model="searchQuery"
-                       @input="filteredAssets" />
-                <select class="select"
-                        style="width: 200px"
-                        x-model="filterStatus"
-                        @change="filteredAssets">
+                <input class="input" placeholder="Search assets..." x-model="searchQuery" @input="filteredAssets" />
+                <select class="select" style="width: 200px" x-model="filterStatus" @change="filteredAssets">
                     <option value="">All Status</option>
                     <option value="assigned">Assigned</option>
                     <option value="available">Available</option>
@@ -142,33 +136,31 @@
         <h3 style="margin-bottom: 12px;">All Assets</h3>
         <section class="grid-3">
             @forelse($assets as $asset)
-                <article class="card panel asset-card"
-                         data-name="{{ $asset->name }}"
-                         data-code="{{ $asset->asset_code }}"
-                         data-type="{{ $asset->type }}"
-                         data-serial="{{ $asset->serial_number }}"
-                         data-brand="{{ $asset->brand }}"
-                         data-status="{{ $asset->status }}">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                        <strong>{{ $asset->name }}</strong>
+                <article class="card asset" data-name="{{ $asset->name }}"
+                    data-code="{{ $asset->asset_code }}" data-type="{{ $asset->type }}"
+                    data-serial="{{ $asset->serial_number }}" data-brand="{{ $asset->brand }}"
+                    data-status="{{ $asset->status }}">
+                    <div class="title">
+                        {{ $asset->name }}
                         <span class="badge {{ $asset->status }}">{{ $asset->status }}</span>
                     </div>
-                    <div class="kv">Code: {{ $asset->asset_code }}</div>
-                    <div class="kv">Type: {{ $asset->type }}</div>
-                    <div class="kv">Serial: {{ $asset->serial_number }}</div>
-                    <div class="kv">Brand: {{ $asset->brand }}</div>
+                    <div class="kv">Serial Number: {{ $asset->asset_code }}</div>
                     <div class="kv">Value: ${{ number_format($asset->value, 2) }}</div>
-                    <div class="kv">Condition: <span
-                            class="badge {{ $asset->condition }}">{{ $asset->condition }}</span></div>
                     <div class="kv">
+                        Condition:
+                        <span class="badge {{ $asset->condition }}">{{ $asset->condition }}</span>
+                    </div>
+                    <div class="kv">Warranty: {{ $asset->warranty_expiry }}</div>
+                    <div class="note">
                         @if ($asset->currentEmployee->first())
-                            Assigned to: <strong>{{ $asset->currentEmployee->first()->name }}</strong>
+                        Assigned to: <strong>{{ $asset->currentEmployee->first()->name }}</strong><br />{{ $asset->currentEmployee->first()->email }}
                         @else
                             <span style="color: #666;">Unassigned</span>
                         @endif
                     </div>
-                    <button class="btn ghost" style="margin-top: 8px;" @click="viewAsset({{ $asset->id }})">🗂
-                        Manage</button>
+                    <button class="btn ghost" @click="viewAsset({{ $asset->id }})">
+                        🗂 Manage
+                    </button>
                 </article>
             @empty
                 <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
@@ -367,7 +359,7 @@
                 },
 
                 get filteredAssets() {
-                    const cards = Array.from(document.querySelectorAll('.asset-card'));
+                    const cards = Array.from(document.querySelectorAll('.asset'));
 
                     cards.forEach(card => {
                         const name = card.dataset.name.toLowerCase();
@@ -387,7 +379,8 @@
                             serial.includes(search) ||
                             brand.includes(search);
 
-                        const matchesStatus = !statusFilter || statusFilter === 'all' || status === statusFilter;
+                        const matchesStatus = !statusFilter || statusFilter === 'all' || status ===
+                            statusFilter;
 
                         if (matchesSearch && matchesStatus) {
                             card.style.display = '';
