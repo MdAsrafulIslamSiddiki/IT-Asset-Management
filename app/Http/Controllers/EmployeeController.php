@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Employee;
 use App\Models\Asset;
 use App\Models\License;
+use App\Models\Employee;
+use Illuminate\Http\Request;
+use App\Services\EmployeeService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
-use App\Services\EmployeeService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class EmployeeController extends Controller
 {
@@ -28,13 +29,11 @@ class EmployeeController extends Controller
         try {
             $employees = $this->employeeService->getAllEmployees();
 
-            // Get available assets and licenses for assignment modals
             $availableAssets = Asset::where('status', 'available')->get();
             $availableLicenses = License::all();
 
             return view('employees.index', compact('employees', 'availableAssets', 'availableLicenses'));
         } catch (\Exception $e) {
-            Log::error('Employee index error: ' . $e->getMessage());
             return back()->with('error', 'Failed to load employees');
         }
     }
@@ -47,11 +46,6 @@ class EmployeeController extends Controller
         try {
             $employee = $this->employeeService->createEmployee($request->validated());
 
-            Log::info('Employee created', [
-                'employee_id' => $employee->id,
-                'name' => $employee->name,
-                'created_by' => auth()->id() ?? 'system'
-            ]);
 
             if ($request->wantsJson()) {
                 return response()->json([
@@ -64,7 +58,6 @@ class EmployeeController extends Controller
             return redirect()->route('employees.index')
                 ->with('success', 'Employee created successfully');
         } catch (\Exception $e) {
-            Log::error('Employee creation failed: ' . $e->getMessage());
 
             if ($request->wantsJson()) {
                 return response()->json([
@@ -108,7 +101,6 @@ class EmployeeController extends Controller
                 ])
             ]);
         } catch (\Exception $e) {
-            Log::error('Employee show error: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -132,8 +124,6 @@ class EmployeeController extends Controller
                 'join_date' => $employee->join_date
             ]);
         } catch (\Exception $e) {
-            Log::error('Employee edit error: ' . $e->getMessage());
-
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to load employee data'
@@ -149,10 +139,6 @@ class EmployeeController extends Controller
         try {
             $updatedEmployee = $this->employeeService->updateEmployee($employee, $request->validated());
 
-            Log::info('Employee updated', [
-                'employee_id' => $employee->id,
-                'updated_by' => auth()->id() ?? 'system'
-            ]);
 
             if ($request->wantsJson()) {
                 return response()->json([
@@ -165,7 +151,6 @@ class EmployeeController extends Controller
             return redirect()->route('employees.index')
                 ->with('success', 'Employee updated successfully');
         } catch (\Exception $e) {
-            Log::error('Employee update failed: ' . $e->getMessage());
 
             if ($request->wantsJson()) {
                 return response()->json([
@@ -187,12 +172,6 @@ class EmployeeController extends Controller
         try {
             $this->employeeService->deleteEmployee($employee);
 
-            Log::info('Employee deleted', [
-                'employee_id' => $employee->id,
-                'employee_name' => $employee->name,
-                'deleted_by' => auth()->id() ?? 'system'
-            ]);
-
             if (request()->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -203,7 +182,6 @@ class EmployeeController extends Controller
             return redirect()->route('employees.index')
                 ->with('success', 'Employee deleted successfully');
         } catch (\Exception $e) {
-            Log::error('Employee deletion failed: ' . $e->getMessage());
 
             if (request()->wantsJson()) {
                 return response()->json([
@@ -243,7 +221,7 @@ class EmployeeController extends Controller
             }
 
             // Check if asset is assigned to ANY employee (using pivot table)
-            $isAssetAssigned = \DB::table('employee_asset')
+            $isAssetAssigned = DB::table('employee_asset')
                 ->where('asset_id', $asset->id)
                 ->where('assignment_status', 'active')
                 ->exists();
@@ -271,18 +249,12 @@ class EmployeeController extends Controller
                 'assignment_status' => 'active'
             ]);
 
-            Log::info('Asset assigned to employee via pivot', [
-                'employee_id' => $employee->id,
-                'asset_id' => $asset->id,
-                'assigned_by' => auth()->id() ?? 'system'
-            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Asset assigned successfully'
             ]);
         } catch (\Exception $e) {
-            Log::error('Asset assignment failed: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -333,23 +305,52 @@ class EmployeeController extends Controller
             // Update used_quantity - INCREMENT by 1
             $license->increment('used_quantity');
 
-            Log::info('License assigned to employee', [
-                'employee_id' => $employee->id,
-                'license_id' => $request->license_id,
-                'assigned_by' => auth()->id() ?? 'system'
-            ]);
-
             return response()->json([
                 'success' => true,
                 'message' => 'License assigned successfully'
             ]);
         } catch (\Exception $e) {
-            Log::error('License assignment failed: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to assign license: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Generate and download employee clearance paper
+     *
+     * @param Employee $employee
+     * @return \Illuminate\Http\Response
+     */
+    public function generateClearance(Employee $employee)
+    {
+        try {
+            // Load relationships
+            $employee->load(['assets', 'licenses']);
+
+            // Render the blade view as plain text
+            $content = View::make('clearance.template', compact('employee'))->render();
+
+            // Generate filename
+            $filename = 'Clearance_'
+                      . str_replace(' ', '_', $employee->name)
+                      . '_' . $employee->iqama_id
+                      . '_' . date('Ymd_His')
+                      . '.txt';
+
+
+            // Return as downloadable text file
+            return response($content)
+                ->header('Content-Type', 'text/plain')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to generate clearance paper: ' . $e->getMessage());
         }
     }
 }

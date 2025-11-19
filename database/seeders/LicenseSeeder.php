@@ -18,8 +18,8 @@ class LicenseSeeder extends Seeder
                 'license_type' => 'per-user',
                 'total_quantity' => 50,
                 'used_quantity' => 35,
-                'purchase_date' => '1/1/2023',
-                'expiry_date' => '1/1/2024',
+                'purchase_date' => '2023-01-01',
+                'expiry_date' => '2024-01-01',
                 'cost_per_license' => 12.50,
                 'status' => 'active',
             ],
@@ -31,8 +31,8 @@ class LicenseSeeder extends Seeder
                 'license_type' => 'per-user',
                 'total_quantity' => 10,
                 'used_quantity' => 8,
-                'purchase_date' => '2/1/2023',
-                'expiry_date' => '2/1/2024',
+                'purchase_date' => '2023-02-01',
+                'expiry_date' => '2024-02-01',
                 'cost_per_license' => 54.99,
                 'status' => 'active',
             ],
@@ -44,12 +44,11 @@ class LicenseSeeder extends Seeder
                 'license_type' => 'per-user',
                 'total_quantity' => 100,
                 'used_quantity' => 75,
-                'purchase_date' => '1/15/2023',
-                'expiry_date' => '1/15/2024',
+                'purchase_date' => '2023-01-15',
+                'expiry_date' => '2024-01-15',
                 'cost_per_license' => 8.00,
                 'status' => 'active',
             ],
-            
         ];
 
         foreach ($licenses as $license) {

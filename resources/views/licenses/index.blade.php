@@ -165,7 +165,7 @@
         </section>
 
         <!-- License Detail Modal -->
-        <div class="modal" x-show="modalOpen" x-transition style="display: none;">
+        <div class="modal" x-show="modalOpen" x-transition>
             <div class="dialog">
                 <div class="head">
                     <strong x-text="viewingLicense.name"></strong>

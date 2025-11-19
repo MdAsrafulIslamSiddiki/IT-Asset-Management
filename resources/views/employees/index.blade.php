@@ -1,16 +1,18 @@
 @extends('layouts.backendLayout')
 @section('title', 'Employees')
 
+
+
 @section('content')
     <main class="page" x-data="employeeManager()">
         <!-- Success/Error Messages -->
-        @if (session('success'))
+        @if(session('success'))
             <div class="alert success" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                 {{ session('success') }}
             </div>
         @endif
 
-        @if (session('error'))
+        @if(session('error'))
             <div class="alert error" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                 {{ session('error') }}
             </div>
@@ -51,15 +53,13 @@
 
                     <div class="form-row">
                         <label>Department</label>
-                        <input type="text" class="input" x-model="formData.department"
-                            placeholder="e.g., IT, HR, Finance" />
+                        <input type="text" class="input" x-model="formData.department" placeholder="e.g., IT, HR, Finance" />
                         <span class="error-text" x-show="errors.department" x-text="errors.department"></span>
                     </div>
 
                     <div class="form-row">
                         <label>Position</label>
-                        <input type="text" class="input" x-model="formData.position"
-                            placeholder="e.g., Manager, Developer" />
+                        <input type="text" class="input" x-model="formData.position" placeholder="e.g., Manager, Developer" />
                         <span class="error-text" x-show="errors.position" x-text="errors.position"></span>
                     </div>
 
@@ -100,8 +100,7 @@
                         <div class="pill"><strong>{{ $employee->licenses_count ?? 0 }}</strong><br />Licenses</div>
                     </div>
                     <div class="foot">
-                        <a class="eye" href="javascript:void(0)" @click="viewEmployee({{ $employee->id }})">👁 View
-                            Profile</a>
+                        <a class="eye" href="javascript:void(0)" @click="viewEmployee({{ $employee->id }})">👁 View Profile</a>
                     </div>
                 </article>
             @empty
@@ -129,21 +128,17 @@
                             <div class="kv">Join Date: <strong x-text="viewingEmployee.join_date"></strong></div>
                             <div class="kv">
                                 Status:
-                                <span class="badge" :class="viewingEmployee.status"
-                                    x-text="viewingEmployee.status"></span>
+                                <span class="badge" :class="viewingEmployee.status" x-text="viewingEmployee.status"></span>
                             </div>
 
-                            <h4 style="margin-top: 16px;">Assigned Assets (<span
-                                    x-text="viewingEmployee.assets?.length || 0"></span>)</h4>
+                            <h4 style="margin-top: 16px;">Assigned Assets (<span x-text="viewingEmployee.assets?.length || 0"></span>)</h4>
                             <template x-if="viewingEmployee.assets && viewingEmployee.assets.length > 0">
                                 <div style="display: grid; gap: 8px; margin-top: 8px;">
                                     <template x-for="asset in viewingEmployee.assets" :key="asset.id">
                                         <div class="card panel" style="padding: 8px;">
                                             <strong x-text="asset.name"></strong>
-                                            <div class="kv" style="font-size: 12px;">Serial: <span
-                                                    x-text="asset.serial_number"></span></div>
-                                            <span class="badge" :class="asset.condition" x-text="asset.condition"
-                                                style="font-size: 11px;"></span>
+                                            <div class="kv" style="font-size: 12px;">Serial: <span x-text="asset.serial_number"></span></div>
+                                            <span class="badge" :class="asset.condition" x-text="asset.condition" style="font-size: 11px;"></span>
                                         </div>
                                     </template>
                                 </div>
@@ -160,18 +155,18 @@
                                     ✏️ Edit Employee
                                 </button>
                                 <button class="btn" style="background: #ef4444; color: #fff; border-color: #ef4444;"
-                                    @click="deleteEmployeeFromModal()">
+                                        @click="deleteEmployeeFromModal()">
                                     🗑️ Delete Employee
                                 </button>
                                 <button class="btn primary" @click="generateClearancePaper()">
                                     📄 Generate Clearance Paper
                                 </button>
                                 <button class="btn" style="background: #22c55e; color: #fff; border-color: #22c55e;"
-                                    @click="openAssignAssetModal()">
+                                        @click="openAssignAssetModal()">
                                     💼 Assign Asset
                                 </button>
                                 <button class="btn" style="background: #8b5cf6; color: #fff; border-color: #8b5cf6;"
-                                    @click="openAssignLicenseModal()">
+                                        @click="openAssignLicenseModal()">
                                     🔑 Assign License
                                 </button>
                             </div>
@@ -183,8 +178,7 @@
                                         <div class="card panel" style="padding: 8px;">
                                             <strong x-text="license.name"></strong>
                                             <span class="badge active" style="font-size: 11px;">active</span>
-                                            <div class="kv" style="font-size: 12px;">Expires: <span
-                                                    x-text="license.expiry_date"></span></div>
+                                            <div class="kv" style="font-size: 12px;">Expires: <span x-text="license.expiry_date"></span></div>
                                         </div>
                                     </template>
                                 </div>
@@ -213,14 +207,13 @@
                         <label>Select Asset</label>
                         <select class="input" x-model="assignAssetData.asset_id">
                             <option value="">Choose an asset...</option>
-                            @foreach ($availableAssets ?? [] as $asset)
+                            @foreach($availableAssets ?? [] as $asset)
                                 <option value="{{ $asset->id }}">
                                     {{ $asset->name }} ({{ $asset->asset_code }}) - {{ $asset->type }}
                                 </option>
                             @endforeach
                         </select>
-                        <span class="error-text" x-show="assignAssetErrors.asset_id"
-                            x-text="assignAssetErrors.asset_id"></span>
+                        <span class="error-text" x-show="assignAssetErrors.asset_id" x-text="assignAssetErrors.asset_id"></span>
                     </div>
 
                     <div class="form-row">
@@ -250,21 +243,19 @@
                         <label>Select License</label>
                         <select class="input" x-model="assignLicenseData.license_id">
                             <option value="">Choose a license...</option>
-                            @foreach ($availableLicenses ?? [] as $license)
+                            @foreach($availableLicenses ?? [] as $license)
                                 <option value="{{ $license->id }}">
                                     {{ $license->name }} - {{ $license->type }}
                                 </option>
                             @endforeach
                         </select>
-                        <span class="error-text" x-show="assignLicenseErrors.license_id"
-                            x-text="assignLicenseErrors.license_id"></span>
+                        <span class="error-text" x-show="assignLicenseErrors.license_id" x-text="assignLicenseErrors.license_id"></span>
                     </div>
 
                     <div class="form-row">
                         <label>Expiry Date</label>
                         <input type="date" class="input" x-model="assignLicenseData.expiry_date" />
-                        <span class="error-text" x-show="assignLicenseErrors.expiry_date"
-                            x-text="assignLicenseErrors.expiry_date"></span>
+                        <span class="error-text" x-show="assignLicenseErrors.expiry_date" x-text="assignLicenseErrors.expiry_date"></span>
                     </div>
                 </div>
                 <div class="foot">
@@ -375,39 +366,39 @@
                     };
 
                     fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                            },
-                            body: JSON.stringify(formData)
-                        })
-                        .then(async response => {
-                            const data = await response.json();
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(async response => {
+                        const data = await response.json();
 
-                            if (response.status === 422) {
-                                this.errors = {};
-                                if (data.errors) {
-                                    Object.keys(data.errors).forEach(key => {
-                                        this.errors[key] = data.errors[key][0];
-                                    });
-                                }
-                                this.submitting = false;
-                                return;
+                        if (response.status === 422) {
+                            this.errors = {};
+                            if (data.errors) {
+                                Object.keys(data.errors).forEach(key => {
+                                    this.errors[key] = data.errors[key][0];
+                                });
                             }
-
-                            if (response.ok && data.success) {
-                                window.location.reload();
-                            } else {
-                                throw new Error(data.message || 'Something went wrong');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert(error.message || 'Something went wrong. Please try again.');
                             this.submitting = false;
-                        });
+                            return;
+                        }
+
+                        if (response.ok && data.success) {
+                            window.location.reload();
+                        } else {
+                            throw new Error(data.message || 'Something went wrong');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert(error.message || 'Something went wrong. Please try again.');
+                        this.submitting = false;
+                    });
                 },
 
                 convertToStorageFormat(date) {
@@ -486,142 +477,51 @@
                 },
 
                 deleteEmployeeFromModal() {
-                    if (!confirm(
-                            `Are you sure you want to delete ${this.viewingEmployee.name}?\n\nThis employee has ${this.viewingEmployee.assets?.length || 0} assigned assets. Make sure to unassign them first.`
-                            )) {
+                    if (!confirm(`Are you sure you want to delete ${this.viewingEmployee.name}?\n\nThis employee has ${this.viewingEmployee.assets?.length || 0} assigned assets. Make sure to unassign them first.`)) {
                         return;
                     }
 
                     fetch(`/employees/${this.viewingEmployee.id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                window.location.reload();
-                            } else {
-                                alert(data.message || 'Failed to delete employee');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to delete employee');
-                        });
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Failed to delete employee');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to delete employee');
+                    });
                 },
 
                 generateClearancePaper() {
-                    const emp = this.viewingEmployee;
+                    // Simply redirect to backend route for download
+                    const url = `/employees/${this.viewingEmployee.id}/clearance`;
+                    window.location.href = url;
 
-                    // Generate clearance document content
-                    const content = `
-╔═══════════════════════════════════════════════════════════════╗
-║              EMPLOYEE CLEARANCE CERTIFICATE                   ║
-╚═══════════════════════════════════════════════════════════════╝
-
-Date of Issue: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-
-───────────────────────────────────────────────────────────────
-
-EMPLOYEE INFORMATION:
-───────────────────────────────────────────────────────────────
-Name:           ${emp.name}
-Iqama ID:       ${emp.iqama_id}
-Email:          ${emp.email}
-Department:     ${emp.department}
-Position:       ${emp.position}
-Join Date:      ${emp.join_date}
-Status:         ${emp.status.toUpperCase()}
-
-───────────────────────────────────────────────────────────────
-
-ASSIGNED ASSETS (${emp.assets?.length || 0}):
-───────────────────────────────────────────────────────────────
-${emp.assets && emp.assets.length > 0
-    ? emp.assets.map((asset, i) => `${i + 1}. ${asset.name}
-       Serial Number: ${asset.serial_number}
-       Condition: ${asset.condition}
-    `).join('\n')
-    : 'No assets assigned'}
-
-───────────────────────────────────────────────────────────────
-
-ASSIGNED LICENSES (${emp.licenses?.length || 0}):
-───────────────────────────────────────────────────────────────
-${emp.licenses && emp.licenses.length > 0
-    ? emp.licenses.map((license, i) => `${i + 1}. ${license.name}
-       Expiry Date: ${license.expiry_date}
-    `).join('\n')
-    : 'No licenses assigned'}
-
-───────────────────────────────────────────────────────────────
-
-CLEARANCE STATUS:
-───────────────────────────────────────────────────────────────
-☐ All company assets returned
-☐ All access cards/badges returned
-☐ All company documents returned
-☐ Exit interview completed
-☐ Final settlement processed
-
-───────────────────────────────────────────────────────────────
-
-DEPARTMENT CLEARANCES:
-───────────────────────────────────────────────────────────────
-☐ HR Department         ________________  Date: __________
-☐ IT Department         ________________  Date: __________
-☐ Finance Department    ________________  Date: __________
-☐ Direct Supervisor     ________________  Date: __________
-
-───────────────────────────────────────────────────────────────
-
-This clearance certificate confirms that the above-named employee
-has completed all necessary procedures for separation from the company.
-
-Authorized Signature: ______________________
-
-Date: ________________
-
-
-═══════════════════════════════════════════════════════════════
-  This is a computer-generated document. No signature required.
-═══════════════════════════════════════════════════════════════
-                    `.trim();
-
-                    // Create and download the file
-                    const blob = new Blob([content], {
-                        type: 'text/plain'
-                    });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `Clearance_${emp.name.replace(/\s+/g, '_')}_${emp.iqama_id}_${new Date().getTime()}.txt`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-
-                    alert('Clearance paper generated successfully!');
+                    // Show notification
+                    setTimeout(() => {
+                        alert('Clearance paper download started!');
+                    }, 500);
                 },
 
                 openAssignAssetModal() {
-                    this.assignAssetData = {
-                        asset_id: '',
-                        notes: ''
-                    };
+                    this.assignAssetData = { asset_id: '', notes: '' };
                     this.assignAssetErrors = {};
                     this.assignAssetModalOpen = true;
                 },
 
                 closeAssignAssetModal() {
                     this.assignAssetModalOpen = false;
-                    this.assignAssetData = {
-                        asset_id: '',
-                        notes: ''
-                    };
+                    this.assignAssetData = { asset_id: '', notes: '' };
                     this.assignAssetErrors = {};
                 },
 
@@ -634,46 +534,40 @@ Date: ________________
                     this.assigningAsset = true;
 
                     fetch(`/employees/${this.viewingEmployee.id}/assign-asset`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                            },
-                            body: JSON.stringify(this.assignAssetData)
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            this.assigningAsset = false;
-                            if (data.success) {
-                                alert(data.message);
-                                window.location.reload();
-                            } else {
-                                alert(data.message || 'Failed to assign asset');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to assign asset');
-                            this.assigningAsset = false;
-                        });
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify(this.assignAssetData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.assigningAsset = false;
+                        if (data.success) {
+                            alert(data.message);
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Failed to assign asset');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to assign asset');
+                        this.assigningAsset = false;
+                    });
                 },
 
                 openAssignLicenseModal() {
-                    this.assignLicenseData = {
-                        license_id: '',
-                        expiry_date: ''
-                    };
+                    this.assignLicenseData = { license_id: '', expiry_date: '' };
                     this.assignLicenseErrors = {};
                     this.assignLicenseModalOpen = true;
                 },
 
                 closeAssignLicenseModal() {
                     this.assignLicenseModalOpen = false;
-                    this.assignLicenseData = {
-                        license_id: '',
-                        expiry_date: ''
-                    };
+                    this.assignLicenseData = { license_id: '', expiry_date: '' };
                     this.assignLicenseErrors = {};
                 },
 
@@ -696,32 +590,32 @@ Date: ________________
                     this.assigningLicense = true;
 
                     fetch(`/employees/${this.viewingEmployee.id}/assign-license`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                ...this.assignLicenseData,
-                                expiry_date: this.convertToStorageFormat(this.assignLicenseData.expiry_date)
-                            })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            ...this.assignLicenseData,
+                            expiry_date: this.convertToStorageFormat(this.assignLicenseData.expiry_date)
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            this.assigningLicense = false;
-                            if (data.success) {
-                                alert(data.message);
-                                window.location.reload();
-                            } else {
-                                alert(data.message || 'Failed to assign license');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to assign license');
-                            this.assigningLicense = false;
-                        });
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.assigningLicense = false;
+                        if (data.success) {
+                            alert(data.message);
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Failed to assign license');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to assign license');
+                        this.assigningLicense = false;
+                    });
                 },
 
                 closeModal() {

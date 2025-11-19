@@ -12,26 +12,18 @@ class DashboardController extends Controller
 {
     public function dashboard()
     {
-        // Active employees: unique employees with active assignments
-        $activeEmployees = DB::table('employee_asset')
-            ->where('assignment_status', 'active')
-            ->distinct('employee_id')
-            ->count('employee_id');
+        $activeEmployees = Employee::where('status', 'active')->count();
 
-        // Assigned assets (active assignments)
         $assignedAssets = DB::table('employee_asset')
             ->where('assignment_status', 'active')
             ->count();
 
-        // Total licenses
         $totalLicenses = License::count();
 
-        // Expiring soon licenses (next 30 days)
         $expiringSoon = License::where('expiry_date', '<=', now()->addDays(30))
                                 ->where('status', 'active')
                                 ->count();
 
-        // Recent asset assignments (last 5 active assignments)
         $recentAssets = DB::table('employee_asset')
             ->where('assignment_status', 'active')
             ->orderBy('assigned_date', 'desc')
@@ -41,7 +33,6 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // License utilization
         $licenses = License::all();
 
         return view('dashboard', compact(

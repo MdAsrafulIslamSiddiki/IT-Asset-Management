@@ -32,7 +32,7 @@
                 Search
             </a>
 
-            <a class="tab {{ request()->routeIs('report') ? 'active' : '' }}" href="{{ route('report') }}">
+            <a class="tab {{ request()->routeIs('reports.index') ? 'active' : '' }}" href="{{ route('reports.index') }}">
                 Reports
             </a>
 

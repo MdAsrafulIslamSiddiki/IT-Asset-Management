@@ -369,44 +369,62 @@ label {
     background: rgba(15, 23, 42, 0.45);
     padding: 20px;
 }
+
 .modal.open {
     display: flex;
 }
+
 .modal .dialog {
     background: #fff;
     border-radius: 16px;
     box-shadow: var(--shadow);
     max-width: 820px;
     width: 100%;
+
+    /* FIX ADDED */
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
 }
+
 .modal .head {
     padding: 18px 20px;
     border-bottom: 1px solid var(--ring);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
 }
+
 .modal .body {
     padding: 20px;
+
+    overflow-y: auto;
+    flex: 1;
 }
+
 .modal .cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 18px;
 }
+
 @media (max-width: 800px) {
     .modal .cols {
         grid-template-columns: 1fr;
     }
 }
+
 .modal .foot {
     padding: 16px 20px;
     border-top: 1px solid var(--ring);
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+    flex-shrink: 0;
 }
+
 
 /* METRICS */
 .stats {
@@ -584,7 +602,7 @@ label {
 
 .form-row {
     position: relative;
-    margin-bottom: 20px; /* Error message er jayga banate extra space */
+    margin-bottom: 20px;
 }
 
 .error-text {

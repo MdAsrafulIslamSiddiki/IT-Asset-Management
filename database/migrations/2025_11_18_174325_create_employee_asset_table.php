@@ -18,8 +18,6 @@ return new class extends Migration
             $table->text('assignment_notes')->nullable();
             $table->timestamps();
 
-            // Prevent duplicate active assignments
-            // $table->unique(['asset_id', 'employee_id', 'assignment_status']);
         });
     }
 

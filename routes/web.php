@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\LicenseController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DashboardController;
 
@@ -16,6 +18,8 @@ Route::post('employees/{employee}/assign-asset', [EmployeeController::class, 'as
     ->name('employees.assign-asset');
 Route::post('employees/{employee}/assign-license', [EmployeeController::class, 'assignLicense'])
     ->name('employees.assign-license');
+Route::get('employees/{employee}/clearance', [EmployeeController::class, 'generateClearance'])
+    ->name('employees.clearance');
 
 
 // assets routes
@@ -36,4 +40,18 @@ Route::post('licenses/{license}/assign', [LicenseController::class, 'assign'])
 Route::post('licenses/{license}/revoke', [LicenseController::class, 'revoke'])
     ->name('licenses.revoke');
 
-Route::get('/report', [ReportController::class, 'index'])->name('report');
+
+// search route
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+
+
+// Route::get('/report', [ReportController::class, 'index'])->name('report.index');
+// Route::post('/employees/{id}/clearance', [EmployeeController::class, 'downloadClearance'])
+//         ->name('employees.clearance.download');
+
+
+Route::prefix('reports')->group(function () {
+    Route::get('/', [ReportsController::class, 'index'])->name('reports.index');
+    Route::post('/employee-details', [ReportsController::class, 'getEmployeeDetails'])->name('reports.employee-details');
+    Route::post('/generate-clearance', [ReportsController::class, 'generateClearancePaper'])->name('reports.generate-clearance');
+});
