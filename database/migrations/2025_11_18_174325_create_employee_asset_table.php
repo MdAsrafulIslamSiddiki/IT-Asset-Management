@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Prevent duplicate active assignments
-            $table->unique(['asset_id', 'employee_id', 'assignment_status']);
+            // $table->unique(['asset_id', 'employee_id', 'assignment_status']);
         });
     }
 

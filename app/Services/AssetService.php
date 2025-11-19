@@ -305,7 +305,7 @@ class AssetService
      */
     private function generateAssetCode()
     {
-        $lastAsset = Asset::withTrashed()->latest('id')->first();
+        $lastAsset = Asset::latest('id')->first();
         $number = $lastAsset ? intval(substr($lastAsset->asset_code, 3)) + 1 : 1;
         return 'AST' . str_pad($number, 5, '0', STR_PAD_LEFT);
     }
