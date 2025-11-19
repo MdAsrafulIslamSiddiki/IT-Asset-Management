@@ -41,7 +41,8 @@ class AssetController extends Controller
                 ]);
             }
 
-            return redirect()->route('asset-management.index')->with('success', 'Asset created successfully');
+            return redirect()->route('asset-management.index')
+                ->with('success', 'Asset created successfully');
         } catch (\Exception $e) {
             if ($request->wantsJson()) {
                 return response()->json([
@@ -49,7 +50,8 @@ class AssetController extends Controller
                     'message' => 'Failed to create asset: ' . $e->getMessage()
                 ], 500);
             }
-            return back()->withInput()->with('error', 'Failed to create asset: ' . $e->getMessage());
+            return back()->withInput()
+                ->with('error', 'Failed to create asset: ' . $e->getMessage());
         }
     }
 
@@ -134,7 +136,8 @@ class AssetController extends Controller
                 ]);
             }
 
-            return redirect()->route('asset-management.index')->with('success', 'Asset updated successfully');
+            return redirect()->route('asset-management.index')
+                ->with('success', 'Asset updated successfully');
         } catch (\Exception $e) {
             if ($request->wantsJson()) {
                 return response()->json([
@@ -142,7 +145,8 @@ class AssetController extends Controller
                     'message' => $e->getMessage()
                 ], 400);
             }
-            return back()->withInput()->with('error', $e->getMessage());
+            return back()->withInput()
+                ->with('error', $e->getMessage());
         }
     }
 
@@ -159,7 +163,8 @@ class AssetController extends Controller
                 ]);
             }
 
-            return redirect()->route('asset-management.index')->with('success', 'Asset deleted successfully');
+            return redirect()->route('asset-management.index')
+                ->with('success', 'Asset deleted successfully');
         } catch (\Exception $e) {
             if (request()->wantsJson()) {
                 return response()->json([
@@ -219,8 +224,6 @@ class AssetController extends Controller
             ], 400);
         }
     }
-
-
 
     public function updateStatus(Request $request, $id)
     {

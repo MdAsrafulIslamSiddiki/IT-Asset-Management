@@ -3,18 +3,14 @@
 
 @section('content')
     <main class="page" x-data="assetManager()">
-        <!-- Success/Error Messages -->
-        @if (session('success'))
-            <div class="alert success" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert error" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
-                {{ session('error') }}
-            </div>
-        @endif
+        <!-- Dynamic Flash Messages (Alpine.js controlled) -->
+        <div x-show="flashMessage"
+             x-transition
+             class="alert"
+             :class="flashType"
+             x-text="flashMessage"
+             style="display: none; margin-bottom: 16px; padding: 12px 16px; border-radius: 8px; font-weight: 500;">
+        </div>
 
         <!-- Header -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -170,7 +166,7 @@
         </section>
 
         <!-- Asset Detail Modal -->
-        <div class="modal" x-show="modalOpen" x-transition >
+        <div class="modal" x-show="modalOpen" x-transition style="display: none;">
             <div class="dialog">
                 <div class="head">
                     <strong x-text="viewingAsset.name"></strong>
@@ -345,6 +341,11 @@
                 errors: {},
                 searchQuery: '',
                 filterStatus: '',
+
+                // Flash message properties
+                flashMessage: '',
+                flashType: '',
+
                 formData: {
                     name: '',
                     type: '',
@@ -356,6 +357,35 @@
                     value: 0,
                     condition: 'good',
                     notes: ''
+                },
+
+                init() {
+                    this.checkFlashMessage();
+                },
+
+                showFlash(message, type = 'success') {
+                    this.flashMessage = message;
+                    this.flashType = type;
+
+                    setTimeout(() => {
+                        this.flashMessage = '';
+                    }, 4000);
+                },
+
+                checkFlashMessage() {
+                    const flash = localStorage.getItem('flashMessage');
+                    if (flash) {
+                        const data = JSON.parse(flash);
+                        this.showFlash(data.message, data.type);
+                        localStorage.removeItem('flashMessage');
+                    }
+                },
+
+                setFlashMessage(message, type = 'success') {
+                    localStorage.setItem('flashMessage', JSON.stringify({
+                        message: message,
+                        type: type
+                    }));
                 },
 
                 get filteredAssets() {
@@ -483,39 +513,40 @@
                     };
 
                     fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                            },
-                            body: JSON.stringify(formData)
-                        })
-                        .then(async response => {
-                            const data = await response.json();
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(async response => {
+                        const data = await response.json();
 
-                            if (response.status === 422) {
-                                this.errors = {};
-                                if (data.errors) {
-                                    Object.keys(data.errors).forEach(key => {
-                                        this.errors[key] = data.errors[key][0];
-                                    });
-                                }
-                                this.submitting = false;
-                                return;
+                        if (response.status === 422) {
+                            this.errors = {};
+                            if (data.errors) {
+                                Object.keys(data.errors).forEach(key => {
+                                    this.errors[key] = data.errors[key][0];
+                                });
                             }
-
-                            if (response.ok && data.success) {
-                                window.location.reload();
-                            } else {
-                                throw new Error(data.message || 'Something went wrong');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert(error.message || 'Something went wrong. Please try again.');
                             this.submitting = false;
-                        });
+                            return;
+                        }
+
+                        if (response.ok && data.success) {
+                            this.setFlashMessage(data.message, 'success');
+                            window.location.reload();
+                        } else {
+                            throw new Error(data.message || 'Something went wrong');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        this.showFlash(error.message || 'Something went wrong', 'error');
+                        this.submitting = false;
+                    });
                 },
 
                 editAsset(id) {
@@ -538,7 +569,7 @@
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('Failed to load asset data');
+                            this.showFlash('Failed to load asset data', 'error');
                         });
                 },
 
@@ -569,7 +600,7 @@
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('Failed to load asset details');
+                            this.showFlash('Failed to load asset details', 'error');
                         });
                 },
 
@@ -587,56 +618,57 @@
                     }
 
                     fetch(`/asset-management/${this.viewingAsset.id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                window.location.reload();
-                            } else {
-                                alert(data.message || 'Failed to delete asset');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to delete asset');
-                        });
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.setFlashMessage(data.message, 'success');
+                            window.location.reload();
+                        } else {
+                            this.showFlash(data.message || 'Failed to delete asset', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        this.showFlash('Failed to delete asset', 'error');
+                    });
                 },
 
                 assignAssetToEmployee() {
                     if (!this.assignEmployeeId) {
-                        alert('Please select an employee');
+                        this.showFlash('Please select an employee', 'error');
                         return;
                     }
 
                     fetch(`/asset-management/${this.viewingAsset.id}/assign`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({
-                                employee_id: this.assignEmployeeId,
-                                assignment_notes: this.assignmentNotes
-                            })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            employee_id: this.assignEmployeeId,
+                            assignment_notes: this.assignmentNotes
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert(data.message);
-                                window.location.reload();
-                            } else {
-                                alert(data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to assign asset');
-                        });
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.setFlashMessage(data.message, 'success');
+                            window.location.reload();
+                        } else {
+                            this.showFlash(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        this.showFlash('Failed to assign asset', 'error');
+                    });
                 },
 
                 unassignAsset() {
@@ -645,28 +677,28 @@
                     }
 
                     fetch(`/asset-management/${this.viewingAsset.id}/unassign`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({
-                                return_notes: this.returnNotes
-                            })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            return_notes: this.returnNotes
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert(data.message);
-                                window.location.reload();
-                            } else {
-                                alert(data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to unassign asset');
-                        });
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.setFlashMessage(data.message, 'success');
+                            window.location.reload();
+                        } else {
+                            this.showFlash(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        this.showFlash('Failed to unassign asset', 'error');
+                    });
                 },
 
                 updateAssetStatus(status) {
@@ -675,28 +707,28 @@
                     }
 
                     fetch(`/asset-management/${this.viewingAsset.id}/status`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({
-                                status: status
-                            })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            status: status
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert(data.message);
-                                window.location.reload();
-                            } else {
-                                alert(data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Failed to update status');
-                        });
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.setFlashMessage(data.message, 'success');
+                            window.location.reload();
+                        } else {
+                            this.showFlash(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        this.showFlash('Failed to update status', 'error');
+                    });
                 },
 
                 closeModal() {
@@ -728,4 +760,6 @@
             }
         }
     </script>
+
+
 @endsection
